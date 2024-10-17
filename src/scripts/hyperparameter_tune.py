@@ -12,9 +12,9 @@ load_dotenv()
 roboflow_agent = Roboflow(api_key=os.environ.get("ROBOFLOW_API_KEY"))
 
 dataset = (
-	roboflow_agent.workspace("work-c9x8f")
-	.project("taiwan-license-plate-recognition")
-	.version(2)
+	roboflow_agent.workspace("jackresearch0")
+	.project("taiwan-license-plate-recognition-research-tlprr")
+	.version(7)
 	.download("yolov8-obb", location="../datasets/roboflow")
 )
 
