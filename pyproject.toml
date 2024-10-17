@@ -7,7 +7,10 @@ authors = [
     { name = "hermeschen1116", email = "108386417+hermeschen1116@users.noreply.github.com" } 
 ]
 requires-python = ">=3.12"
-dependencies = []
+dependencies = [
+    "torch>=2.4.1",
+    "transformers>=4.45.2",
+]
 
 [project.scripts]
 license-plate-recognition = "license_plate_recognition:main"
@@ -20,6 +23,7 @@ build-backend = "hatchling.build"
 dev-dependencies = [
     "catppuccin-jupyterlab>=0.2.4",
     "datasets>=3.0.1",
+    "huggingface-hub>=0.25.2",
     "jupyter>=1.1.1",
     "python-dotenv>=1.0.1",
     "roboflow>=1.1.48",
