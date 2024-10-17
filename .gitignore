@@ -326,3 +326,4 @@ pyrightconfig.json
 
 # ultralytics
 **/**/runs/
+**/**/YOLOv8/
