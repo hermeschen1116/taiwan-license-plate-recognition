@@ -24,6 +24,7 @@ model.tune(
 	data=f"{dataset.location}/data.yaml",
 	epochs=20,
 	iterations=300,
+	imgsz=640,
 	optimizer="AdamW",
 	plots=False,
 	save=False,
