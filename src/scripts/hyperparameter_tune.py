@@ -10,6 +10,8 @@ from license_plate_recognition.helper import get_num_of_workers, get_torch_devic
 
 load_dotenv()
 
+project_root: str = os.environ.get("PROJECT_ROOT", "")
+
 experiment = comet_ml.Experiment(project_name="license-plate-recognition")
 
 roboflow_agent = Roboflow(api_key=os.environ.get("ROBOFLOW_API_KEY"))
@@ -18,7 +20,7 @@ dataset = (
 	roboflow_agent.workspace("jackresearch0")
 	.project("taiwan-license-plate-recognition-research-tlprr")
 	.version(7)
-	.download("yolov8-obb", location="../datasets/roboflow")
+	.download("yolov8-obb", location=f"{project_root}/datasets/roboflow")
 )
 
 model = YOLO(hf_hub_download("Ultralytics/YOLOv8", filename="yolov8n.pt"))
