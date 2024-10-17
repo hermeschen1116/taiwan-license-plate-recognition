@@ -10,8 +10,7 @@ from license_plate_recognition.helper import get_num_of_workers, get_torch_devic
 
 load_dotenv()
 
-comet_ml.login(api_key=os.environ.get("COMET_API_KEY"))
-experiment = comet_ml.Experiment(project_name="license-plate-recognition", workspace="work")
+experiment = comet_ml.Experiment(project_name="license-plate-recognition")
 
 roboflow_agent = Roboflow(api_key=os.environ.get("ROBOFLOW_API_KEY"))
 
