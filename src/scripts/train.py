@@ -32,7 +32,7 @@ result = model.train(
 	workers=get_num_of_workers(),
 	single_cls=True,
 	resume=True,
-	profile="onnx",
+	profile=True,
 	plots=True,
 )
 
