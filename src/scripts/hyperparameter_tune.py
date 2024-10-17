@@ -31,7 +31,7 @@ model.tune(
 	iterations=300,
 	imgsz=640,
 	optimizer="AdamW",
-	plots=False,
+	plots=True,
 	save=False,
 	val=False,
 	cache="disk",
