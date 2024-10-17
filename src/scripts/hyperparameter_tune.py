@@ -1,5 +1,6 @@
 import os
 
+import comet_ml
 from dotenv import load_dotenv
 from huggingface_hub import hf_hub_download
 from roboflow import Roboflow
@@ -8,6 +9,9 @@ from ultralytics import YOLO
 from license_plate_recognition.helper import get_num_of_workers, get_torch_device
 
 load_dotenv()
+
+comet_ml.login(api_key=os.environ.get("COMET_API_KEY"))
+experiment = comet_ml.Experiment(project_name="license-plate-recognition", workspace="work")
 
 roboflow_agent = Roboflow(api_key=os.environ.get("ROBOFLOW_API_KEY"))
 
@@ -33,3 +37,5 @@ model.tune(
 	device=get_torch_device(),
 	workers=get_num_of_workers(),
 )
+
+experiment.end()
