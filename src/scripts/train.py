@@ -35,3 +35,5 @@ result = model.train(
 	profile="onnx",
 	plots=True,
 )
+
+model.val()
