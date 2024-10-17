@@ -19,5 +19,6 @@ build-backend = "hatchling.build"
 [tool.uv]
 dev-dependencies = [
     "catppuccin-jupyterlab>=0.2.4",
+    "inference-sdk>=0.23.0",
     "jupyter>=1.1.1",
 ]
