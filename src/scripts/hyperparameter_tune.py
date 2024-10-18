@@ -1,11 +1,11 @@
 import os
 
-import wandb
 from dotenv import load_dotenv
 from huggingface_hub import hf_hub_download
 from roboflow import Roboflow
 from ultralytics import YOLO
 
+import wandb
 from license_plate_recognition.helper import get_num_of_workers, get_torch_device
 
 load_dotenv()
@@ -13,8 +13,6 @@ load_dotenv()
 project_root: str = os.environ.get("PROJECT_ROOT", "")
 
 wandb.login(key=os.environ.get("WANDB_API_KEY"))
-
-experiment = wandb.init(job_type="hyperparamerter_tune", project="taiwan-license-plate-recognition", group="yolo")
 
 roboflow_agent = Roboflow(api_key=os.environ.get("ROBOFLOW_API_KEY"))
 
@@ -28,6 +26,7 @@ dataset = (
 model = YOLO(hf_hub_download("Ultralytics/YOLOv8", filename="yolov8n.pt"))
 
 model.tune(
+	project="taiwan-license-plate-recognition",
 	data=f"{dataset.location}/data.yaml",
 	epochs=20,
 	iterations=300,
@@ -41,4 +40,4 @@ model.tune(
 	workers=get_num_of_workers(),
 )
 
-experiment.finish()
+wandb.finish()

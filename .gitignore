@@ -325,7 +325,7 @@ pyrightconfig.json
 **/**/datasets/
 
 # ultralytics
-**/**/runs/
+**/**/taiwan-license-plate-recognition/
 **/**/YOLOv8/
 
 # wandb
