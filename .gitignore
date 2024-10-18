@@ -325,6 +325,7 @@ pyrightconfig.json
 **/**/datasets/
 
 # ultralytics
+**/**/runs/
 **/**/YOLOv8/
 
 # wandb
