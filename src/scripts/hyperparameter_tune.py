@@ -1,6 +1,6 @@
 import os
 
-import comet_ml
+import wandb
 from dotenv import load_dotenv
 from huggingface_hub import hf_hub_download
 from roboflow import Roboflow
@@ -12,7 +12,9 @@ load_dotenv()
 
 project_root: str = os.environ.get("PROJECT_ROOT", "")
 
-experiment = comet_ml.Experiment(project_name="license-plate-recognition")
+wandb.login(key=os.environ.get("WANDB_API_KEY"))
+
+experiment = wandb.init(job_type="hyperparamerter_tune", project="taiwan-license-plate-recognition", group="yolo")
 
 roboflow_agent = Roboflow(api_key=os.environ.get("ROBOFLOW_API_KEY"))
 
@@ -39,4 +41,4 @@ model.tune(
 	workers=get_num_of_workers(),
 )
 
-experiment.end()
+experiment.finish()
