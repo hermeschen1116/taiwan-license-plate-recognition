@@ -21,10 +21,10 @@ build-backend = "hatchling.build"
 [tool.uv]
 dev-dependencies = [
     "catppuccin-jupyterlab>=0.2.4",
-    "comet-ml>=3.47.0",
     "huggingface-hub>=0.25.2",
     "jupyter>=1.1.1",
     "python-dotenv>=1.0.1",
     "roboflow>=1.1.48",
     "ultralytics>=8.3.15",
+    "wandb>=0.18.5",
 ]
