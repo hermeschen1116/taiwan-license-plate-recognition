@@ -321,9 +321,11 @@ pyrightconfig.json
 
 # End of https://www.toptal.com/developers/gitignore/api/macos,linux,jetbrains+all,python
 
-# dataset
+# roboflow
 **/**/datasets/
 
 # ultralytics
-**/**/runs/
 **/**/YOLOv8/
+
+# wandb
+**/**/wandb/
