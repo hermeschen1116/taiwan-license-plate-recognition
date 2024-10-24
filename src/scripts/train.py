@@ -3,6 +3,7 @@ import os
 from dotenv import load_dotenv
 from roboflow import Roboflow
 from ultralytics import YOLO
+from ultralytics.models.yolo.obb.predict import torch
 
 import wandb
 from license_plate_recognition.helper import get_num_of_workers, get_torch_device
@@ -41,3 +42,7 @@ result = model.train(
 )
 
 model.val()
+
+model = torch.compile(model)
+
+model.export(format="openvino", imgsz=640, half=True, int8=True, dynamic=True)
