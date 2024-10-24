@@ -44,7 +44,7 @@ if __name__ == "__main__":
 	pyplot.title("original")
 	pyplot.imshow(image[..., ::-1])
 
-	affine_image, reverse_affine_array = affine_transform(image, 256)
+	affine_image, reverse_affine_array = affine_transform(image, 640)
 	pyplot.subplot(1, 3, 2)
 	pyplot.title("affine_transform")
 	pyplot.imshow(affine_image[..., ::-1])
