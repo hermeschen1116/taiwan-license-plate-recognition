@@ -1,13 +1,11 @@
 import os
 
 from dotenv import load_dotenv
-from huggingface_hub import hf_hub_download
 from roboflow import Roboflow
 from ultralytics import YOLO
 
 import wandb
 from license_plate_recognition.helper import get_num_of_workers, get_torch_device
-from wandb.integration.ultralytics import add_wandb_callback
 
 load_dotenv()
 
@@ -24,9 +22,7 @@ dataset = (
 	.download("yolov8-obb", location=f"{project_root}/datasets/roboflow")
 )
 
-model = YOLO(hf_hub_download("Ultralytics/YOLOv8", filename="yolov8n.pt"))
-
-add_wandb_callback(model, enable_model_checkpointing=True)
+model = YOLO(f"{project_root}/models/yolov8n-obb.pt")
 
 config: dict = {"epochs": 100, "optimzer": "auto"}
 
