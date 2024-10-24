@@ -1,10 +1,10 @@
 import os
 
-import wandb
 from dotenv import load_dotenv
 from roboflow import Roboflow
 from ultralytics import YOLO
 
+import wandb
 from license_plate_recognition.helper import get_num_of_workers, get_torch_device
 
 load_dotenv()
