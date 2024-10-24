@@ -42,4 +42,4 @@ result = model.train(
 
 model.val()
 
-model.export(format="openvino", imgsz=640, half=True, int8=True, batch=1)
+model.export(format="openvino", imgsz=640, half=True, int8=True, batch=1, dynamic=True)
