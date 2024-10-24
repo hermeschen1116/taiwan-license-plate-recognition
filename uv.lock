@@ -2,12 +2,12 @@ version = 1
 requires-python = ">=3.12"
 resolution-markers = [
     "platform_system == 'Darwin' and sys_platform == 'win32'",
+    "platform_machine == 'aarch64' and platform_system == 'Linux' and sys_platform == 'win32'",
+    "(platform_machine != 'aarch64' and platform_system != 'Darwin' and sys_platform == 'win32') or (platform_system != 'Darwin' and platform_system != 'Linux' and sys_platform == 'win32')",
     "platform_system == 'Darwin' and sys_platform != 'linux' and sys_platform != 'win32'",
     "platform_system == 'Darwin' and sys_platform == 'linux'",
-    "platform_machine == 'aarch64' and platform_system == 'Linux' and sys_platform == 'win32'",
     "platform_machine == 'aarch64' and platform_system == 'Linux' and sys_platform != 'linux' and sys_platform != 'win32'",
     "platform_machine == 'aarch64' and platform_system == 'Linux' and sys_platform == 'linux'",
-    "(platform_machine != 'aarch64' and platform_system != 'Darwin' and sys_platform == 'win32') or (platform_system != 'Darwin' and platform_system != 'Linux' and sys_platform == 'win32')",
     "(platform_machine != 'aarch64' and platform_system != 'Darwin' and sys_platform != 'linux' and sys_platform != 'win32') or (platform_system != 'Darwin' and platform_system != 'Linux' and sys_platform != 'linux' and sys_platform != 'win32')",
     "(platform_machine != 'aarch64' and platform_system != 'Darwin' and sys_platform == 'linux') or (platform_system != 'Darwin' and platform_system != 'Linux' and sys_platform == 'linux')",
 ]
@@ -973,6 +973,7 @@ name = "license-plate-recognition"
 version = "0.1.0"
 source = { editable = "." }
 dependencies = [
+    { name = "opencv-python", marker = "(platform_machine != 'aarch64' and python_full_version >= '3.12') or (platform_system != 'Linux' and python_full_version >= '3.12') or platform_system == 'Darwin' or (platform_machine == 'aarch64' and platform_system == 'Linux')" },
     { name = "torch", marker = "(platform_machine != 'aarch64' and python_full_version >= '3.12') or (platform_system != 'Linux' and python_full_version >= '3.12') or platform_system == 'Darwin' or (platform_machine == 'aarch64' and platform_system == 'Linux')" },
     { name = "ultralytics", marker = "(platform_machine != 'aarch64' and python_full_version >= '3.12') or (platform_system != 'Linux' and python_full_version >= '3.12') or platform_system == 'Darwin' or (platform_machine == 'aarch64' and platform_system == 'Linux')" },
 ]
@@ -990,6 +991,7 @@ dev = [
 
 [package.metadata]
 requires-dist = [
+    { name = "opencv-python", specifier = ">=4.10.0.84" },
     { name = "torch", specifier = ">=2.4.1" },
     { name = "ultralytics", specifier = ">=8.3.21" },
 ]
