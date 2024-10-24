@@ -9,6 +9,7 @@ authors = [
 requires-python = ">=3.12"
 dependencies = [
     "torch>=2.4.1",
+    "ultralytics>=8.3.21",
 ]
 
 [project.scripts]
@@ -21,10 +22,10 @@ build-backend = "hatchling.build"
 [tool.uv]
 dev-dependencies = [
     "catppuccin-jupyterlab>=0.2.4",
-    "huggingface-hub>=0.25.2",
+    "commitizen>=3.30.0",
     "jupyter>=1.1.1",
+    "pre-commit>=4.0.1",
     "python-dotenv>=1.0.1",
     "roboflow>=1.1.48",
-    "ultralytics>=8.3.15",
     "wandb>=0.18.5",
 ]
