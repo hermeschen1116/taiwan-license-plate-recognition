@@ -33,7 +33,7 @@ def affine_transform(image: MatLike, new_size: int) -> Tuple[MatLike, numpy.ndar
 
 
 def to_RGB(image: MatLike) -> MatLike:
-	return image.transpose(2, 0, 1)[None]
+	return image.transpose(2, 0, 1)[..., numpy.newaxis]
 
 
 if __name__ == "__main__":
