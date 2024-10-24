@@ -36,7 +36,6 @@ result = model.train(
 	device=get_torch_device(),
 	workers=get_num_of_workers(),
 	single_cls=True,
-	profile=True,
 	plots=True,
 	**config,
 )

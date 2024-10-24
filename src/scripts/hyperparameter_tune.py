@@ -27,7 +27,7 @@ model = YOLO(f"{project_root}/models/yolov8n-obb.pt")
 model.tune(
 	project="taiwan-license-plate-recognition",
 	data=f"{dataset.location}/data.yaml",
-	epochs=20,
+	epochs=10,
 	iterations=300,
 	imgsz=640,
 	optimizer="AdamW",
