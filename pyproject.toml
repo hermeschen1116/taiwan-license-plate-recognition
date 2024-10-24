@@ -25,6 +25,7 @@ dev-dependencies = [
     "catppuccin-jupyterlab>=0.2.4",
     "commitizen>=3.30.0",
     "jupyter>=1.1.1",
+    "matplotlib>=3.9.2",
     "pre-commit>=4.0.1",
     "python-dotenv>=1.0.1",
     "roboflow>=1.1.48",
