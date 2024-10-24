@@ -36,6 +36,12 @@ def to_RGB(image: MatLike) -> MatLike:
 	return image.transpose(2, 0, 1)[..., numpy.newaxis]
 
 
+def preprocess(image: MatLike, new_size: int) -> Tuple[MatLike, numpy.ndarray]:
+	transformed_image, reverse_affine_array = affine_transform(image, new_size)
+
+	return to_RGB(transformed_image), reverse_affine_array
+
+
 if __name__ == "__main__":
 	load_dotenv()
 
