@@ -1,11 +1,10 @@
 import os
 
-import torch
-import wandb
 from dotenv import load_dotenv
 from roboflow import Roboflow
 from ultralytics import YOLO
 
+import wandb
 from license_plate_recognition.helper import get_num_of_workers, get_torch_device
 
 load_dotenv()
@@ -25,7 +24,7 @@ dataset = (
 
 model = YOLO(f"{project_root}/models/yolov8n-obb.pt")
 
-config: dict = {"epochs": 100, "optimzer": "auto"}
+config: dict = {"epochs": 1, "optimizer": "auto"}
 
 result = model.train(
 	project="taiwan-license-plate-recognition",
@@ -39,10 +38,9 @@ result = model.train(
 	single_cls=True,
 	profile=True,
 	plots=True,
+	**config,
 )
 
 model.val()
-
-model = torch.compile(model)
 
 model.export(format="openvino", imgsz=640, half=True, int8=True, dynamic=True)
