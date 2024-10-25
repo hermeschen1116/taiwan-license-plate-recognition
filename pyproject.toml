@@ -14,9 +14,6 @@ dependencies = [
 	"ultralytics>=8.3.21",
 ]
 
-[project.scripts]
-license-plate-recognition = "license_plate_recognition:main"
-
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
