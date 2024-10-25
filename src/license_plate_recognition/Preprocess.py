@@ -1,10 +1,6 @@
-import os
-
 import cv2
 import numpy
 from cv2.typing import MatLike
-from dotenv import load_dotenv
-from matplotlib import pyplot
 from typing_extensions import Tuple
 
 
@@ -40,24 +36,3 @@ def add_letterbox(image: MatLike, new_size: int) -> Tuple[MatLike, numpy.ndarray
 	transformed_image, reverse_affine_array = affine_transform(image, new_size)
 
 	return to_RGB(transformed_image), reverse_affine_array
-
-
-if __name__ == "__main__":
-	load_dotenv()
-
-	image: MatLike = cv2.imread(f"{os.environ.get("PROJECT_ROOT", "")}/test_image.png") / 255
-	pyplot.subplot(1, 3, 1)
-	pyplot.title("original")
-	pyplot.imshow(image[..., ::-1])
-
-	affine_image, reverse_affine_array = affine_transform(image, 640)
-	pyplot.subplot(1, 3, 2)
-	pyplot.title("affine_transform")
-	pyplot.imshow(affine_image[..., ::-1])
-
-	reverse_affine_image = cv2.warpAffine(affine_image, reverse_affine_array, image.shape[:2][::-1])
-	pyplot.subplot(1, 3, 3)
-	pyplot.title("reverse")
-	pyplot.imshow(reverse_affine_image[..., ::-1])
-
-	pyplot.show()
