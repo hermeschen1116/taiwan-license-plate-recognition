@@ -5,7 +5,7 @@ from dotenv import load_dotenv
 from roboflow import Roboflow
 from ultralytics import YOLO
 
-from license_plate_recognition.helper import get_num_of_workers, get_torch_device
+from taiwan_license_plate_recognition.helper import get_num_of_workers, get_torch_device
 
 load_dotenv()
 
