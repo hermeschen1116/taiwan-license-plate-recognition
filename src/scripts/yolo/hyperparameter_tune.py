@@ -16,13 +16,13 @@ wandb.login(key=os.environ.get("WANDB_API_KEY"))
 roboflow_agent = Roboflow(api_key=os.environ.get("ROBOFLOW_API_KEY"))
 
 dataset = (
-	roboflow_agent.workspace("jackresearch0")
-	.project("taiwan-license-plate-recognition-research-tlprr")
-	.version(7)
+	roboflow_agent.workspace("work-c9x8f")
+	.project("license-plate-recognition-spcjf")
+	.version(3)
 	.download("yolov8-obb", location=f"{project_root}/datasets/roboflow")
 )
 
-model = YOLO(f"{project_root}/models/yolov8n-obb.pt")
+model = YOLO(f"{project_root}/models/yolov8n-obb.pt", task="obb")
 
 model.tune(
 	project="taiwan-license-plate-recognition",
