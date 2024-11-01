@@ -17,7 +17,7 @@ roboflow_agent = Roboflow(api_key=os.environ.get("ROBOFLOW_API_KEY"))
 
 dataset = (
 	roboflow_agent.workspace("work-c9x8f")
-	.project("license-plate-recognition-spcjf")
+	.project("license-plate-detection-mdsot")
 	.version(6)
 	.download("yolov8-obb", location=f"{project_root}/datasets/roboflow")
 )
