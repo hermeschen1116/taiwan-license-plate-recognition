@@ -333,3 +333,7 @@ pyrightconfig.json
 
 # wandb
 **/**/wandb/
+
+# model file
+*.pt
+!**/**/models/*.pt
