@@ -4,6 +4,7 @@ import wandb
 from dotenv import load_dotenv
 from roboflow import Roboflow
 from ultralytics import YOLO
+from wandb.integration.ultralytics import add_wandb_callback
 
 from taiwan_license_plate_recognition.helper import get_num_of_workers, get_torch_device
 
@@ -23,6 +24,8 @@ dataset = (
 )
 
 model = YOLO(f"{project_root}/models/yolov8n-obb.pt", task="obb")
+
+add_wandb_callback(model, enable_model_checkpointing=True)
 
 model.tune(
 	project="taiwan-license-plate-recognition",
