@@ -1,6 +1,8 @@
 import os
+from pprint import pprint
 
 import wandb
+import yaml
 from dotenv import load_dotenv
 from roboflow import Roboflow
 from ultralytics import YOLO
@@ -13,6 +15,8 @@ load_dotenv()
 project_root: str = os.environ.get("PROJECT_ROOT", "")
 
 wandb.login(key=os.environ.get("WANDB_API_KEY"))
+
+wandb.init(project="taiwan-license-plate-recognition", job_type="train")
 
 roboflow_agent = Roboflow(api_key=os.environ.get("ROBOFLOW_API_KEY"))
 
@@ -27,7 +31,11 @@ model = YOLO(f"{project_root}/models/yolov8n-obb.pt", task="obb")
 
 add_wandb_callback(model, enable_model_checkpointing=True)
 
-config: dict = {"epochs": 1, "optimizer": "auto"}
+config: dict = {"epochs": 100}
+with open(f"{project_root}/taiwan-license-plate-recognition/tune/best_hyperparameters.yaml") as file:
+	hyperparameters = dict(yaml.full_load(stream=file))
+	config.update(hyperparameters)
+pprint(config)
 
 result = model.train(
 	project="taiwan-license-plate-recognition",
@@ -42,7 +50,5 @@ result = model.train(
 	plots=True,
 	**config,
 )
-
-model.val()
 
 model.export(format="openvino", imgsz=640, half=True, int8=True, batch=1, dynamic=True, device="cpu")
