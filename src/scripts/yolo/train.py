@@ -1,15 +1,14 @@
 import os
 from pprint import pprint
 
-import huggingface_hub
+import wandb
 import yaml
 from dotenv import load_dotenv
 from roboflow import Roboflow
 from ultralytics import YOLO
-
-import wandb
-from taiwan_license_plate_recognition.helper import get_num_of_workers, get_torch_device
 from wandb.integration.ultralytics import add_wandb_callback
+
+from taiwan_license_plate_recognition.helper import get_num_of_workers, get_torch_device
 
 load_dotenv()
 
@@ -32,7 +31,7 @@ model = YOLO(f"{project_root}/models/yolov8n-obb.pt", task="obb")
 
 add_wandb_callback(model, enable_model_checkpointing=True, visualize_skeleton=True)
 
-config: dict = {"epochs": 1000, "patience": 50, "optimizer": "AdamW",}
+config: dict = {"epochs": 1000, "patience": 50, "optimizer": "AdamW"}
 with open(f"{project_root}/taiwan-license-plate-recognition/tune/best_hyperparameters.yaml") as file:
 	hyperparameters = dict(yaml.full_load(stream=file))
 	config.update(hyperparameters)

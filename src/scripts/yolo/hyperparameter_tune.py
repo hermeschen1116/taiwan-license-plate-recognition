@@ -1,20 +1,18 @@
 import os
 
+import wandb
 from dotenv import load_dotenv
 from roboflow import Roboflow
 from ultralytics import YOLO
-
-import wandb
-from taiwan_license_plate_recognition.helper import get_num_of_workers, get_torch_device
 from wandb.integration.ultralytics import add_wandb_callback
+
+from taiwan_license_plate_recognition.helper import get_num_of_workers, get_torch_device
 
 load_dotenv()
 
 project_root: str = os.environ.get("PROJECT_ROOT", "")
 
 wandb.login(key=os.environ.get("WANDB_API_KEY"))
-
-wandb.init(project="taiwan-license-plate-recognition", job_type="tune")
 
 roboflow_agent = Roboflow(api_key=os.environ.get("ROBOFLOW_API_KEY"))
 
@@ -43,5 +41,7 @@ model.tune(
 	device=get_torch_device(),
 	workers=get_num_of_workers(),
 )
+
+wandb.
 
 wandb.finish()
