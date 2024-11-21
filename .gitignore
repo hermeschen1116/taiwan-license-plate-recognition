@@ -325,7 +325,7 @@ pyrightconfig.json
 # End of https://www.toptal.com/developers/gitignore/api/macos,linux,jetbrains+all,python
 
 # roboflow
-**/**/datasets/
+**/**/datasets/roboflow
 
 # ultralytics
 **/**/taiwan-license-plate-recognition/
@@ -337,3 +337,4 @@ pyrightconfig.json
 # model file
 *.pt
 !**/**/models/*.pt
+
