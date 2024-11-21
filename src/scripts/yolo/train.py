@@ -32,7 +32,7 @@ model = YOLO(f"{project_root}/models/yolov8n-obb.pt", task="obb")
 
 add_wandb_callback(model, enable_model_checkpointing=True, visualize_skeleton=True)
 
-config: dict = {"epochs": 1000, "patience": 50}
+config: dict = {"epochs": 1000, "patience": 50, "optimizer": "AdamW",}
 with open(f"{project_root}/taiwan-license-plate-recognition/tune/best_hyperparameters.yaml") as file:
 	hyperparameters = dict(yaml.full_load(stream=file))
 	config.update(hyperparameters)
@@ -47,7 +47,6 @@ result = model.train(
 	cache="disk",
 	device=get_torch_device(),
 	workers=get_num_of_workers(),
-	optimizer="AdamW",
 	single_cls=True,
 	plots=True,
 	**config,
