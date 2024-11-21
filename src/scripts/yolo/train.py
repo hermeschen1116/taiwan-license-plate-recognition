@@ -1,14 +1,15 @@
 import os
 from pprint import pprint
 
-import wandb
+import huggingface_hub
 import yaml
 from dotenv import load_dotenv
 from roboflow import Roboflow
 from ultralytics import YOLO
-from wandb.integration.ultralytics import add_wandb_callback
 
+import wandb
 from taiwan_license_plate_recognition.helper import get_num_of_workers, get_torch_device
+from wandb.integration.ultralytics import add_wandb_callback
 
 load_dotenv()
 
@@ -16,7 +17,7 @@ project_root: str = os.environ.get("PROJECT_ROOT", "")
 
 wandb.login(key=os.environ.get("WANDB_API_KEY"))
 
-wandb.init(project="taiwan-license-plate-recognition", job_type="train")
+run = wandb.init(project="taiwan-license-plate-recognition", job_type="train")
 
 roboflow_agent = Roboflow(api_key=os.environ.get("ROBOFLOW_API_KEY"))
 
@@ -29,9 +30,9 @@ dataset = (
 
 model = YOLO(f"{project_root}/models/yolov8n-obb.pt", task="obb")
 
-add_wandb_callback(model, enable_model_checkpointing=True)
+add_wandb_callback(model, enable_model_checkpointing=True, visualize_skeleton=True)
 
-config: dict = {"epochs": 100}
+config: dict = {"epochs": 1000, "patience": 50}
 with open(f"{project_root}/taiwan-license-plate-recognition/tune/best_hyperparameters.yaml") as file:
 	hyperparameters = dict(yaml.full_load(stream=file))
 	config.update(hyperparameters)
@@ -46,9 +47,13 @@ result = model.train(
 	cache="disk",
 	device=get_torch_device(),
 	workers=get_num_of_workers(),
+	optimizer="AdamW",
 	single_cls=True,
 	plots=True,
 	**config,
 )
 
-model.export(format="openvino", imgsz=640, half=True, int8=True, batch=1, dynamic=True, device="cpu")
+path_to_model: str = model.export(format="openvino", imgsz=640, half=True, batch=1, dynamic=True, device="cpu")
+run.log_model(f"{project_root}/{path_to_model}", name="license-plate-detection")
+
+wandb.finish()
