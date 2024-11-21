@@ -42,6 +42,4 @@ model.tune(
 	workers=get_num_of_workers(),
 )
 
-wandb.
-
 wandb.finish()
