@@ -45,7 +45,6 @@ result = model.val(
 
 run.log(result.results_dict)
 run.log(result.speed)
-run.log(result.confusion_matrix)
 
 wandb.finish()
 
