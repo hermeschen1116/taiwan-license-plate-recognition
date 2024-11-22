@@ -23,7 +23,7 @@ dataset = (
 	.download("yolov8-obb", location=f"{project_root}/datasets/roboflow")
 )
 
-model_path: str = run.use_model("license-plate-detection:latest").download()
+model_path: str = run.use_model("license-plate-detection:latest")
 
 model = YOLO(model_path, task="obb")
 
