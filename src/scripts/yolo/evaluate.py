@@ -27,7 +27,7 @@ model_path: str = run.use_model("license-plate-detection:latest")
 
 os.replace(model_path, f"{model_path}_openvino_model")
 
-model = YOLO(model_path, task="obb")
+model = YOLO(f"{model_path}_openvino_model", task="obb")
 
 add_wandb_callback(model, enable_model_checkpointing=True, visualize_skeleton=True)
 
