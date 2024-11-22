@@ -32,7 +32,6 @@ add_wandb_callback(model, enable_model_checkpointing=True, visualize_skeleton=Tr
 result = model.val(
 	project="taiwan-license-plate-recognition",
 	data=f"{dataset.location}/data.yaml",
-	batch=-1,
 	imgsz=640,
 	device="cpu",
 	half=False,
