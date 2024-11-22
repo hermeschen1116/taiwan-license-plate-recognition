@@ -40,7 +40,12 @@ result = model.val(
 	device="cpu",
 	split="test",
 	plots=True,
+	save_json=True,
 )
+
+run.log(result.results_dict)
+run.log(result.speed)
+run.log(result.confusion_matrix)
 
 wandb.finish()
 
