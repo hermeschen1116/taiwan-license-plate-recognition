@@ -1,14 +1,14 @@
 import os
 from pprint import pprint
 
-import wandb
 import yaml
 from dotenv import load_dotenv
 from roboflow import Roboflow
 from ultralytics import YOLO
-from wandb.integration.ultralytics import add_wandb_callback
 
+import wandb
 from taiwan_license_plate_recognition.helper import get_num_of_workers, get_torch_device
+from wandb.integration.ultralytics import add_wandb_callback
 
 load_dotenv()
 
@@ -50,6 +50,8 @@ result = model.train(
 	plots=True,
 	**config,
 )
+
+run = wandb.init(project="taiwan-license-plate-recognition", id=run.id, resume=True)
 
 path_to_model: str = model.export(format="openvino", imgsz=640, half=True, batch=1, dynamic=True, device="cpu")
 run.log_model(f"{project_root}/{path_to_model}", name="license-plate-detection")
