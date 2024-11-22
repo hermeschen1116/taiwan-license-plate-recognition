@@ -1,4 +1,5 @@
 import os
+import shutil
 
 import wandb
 from dotenv import load_dotenv
@@ -25,7 +26,7 @@ dataset = (
 
 model_path: str = run.use_model("license-plate-detection:latest")
 
-os.replace(model_path, f"{model_path}_openvino_model")
+os.replace(model_path, f"{model_path}_openvino")
 
 model = YOLO(f"{model_path}_openvino_model", task="obb")
 
@@ -42,3 +43,5 @@ result = model.val(
 )
 
 wandb.finish()
+
+shutil.rmtree(f"{project_root}/artifacts")
