@@ -16,7 +16,7 @@ project_root: str = os.environ.get("PROJECT_ROOT", "")
 
 wandb.login(key=os.environ.get("WANDB_API_KEY"))
 
-run = wandb.init(project="taiwan-license-plate-recognition", job_type="train")
+run = wandb.init(project="taiwan-license-plate-recognition", job_type="train", group="yolov8obb")
 
 roboflow_agent = Roboflow(api_key=os.environ.get("ROBOFLOW_API_KEY"))
 
