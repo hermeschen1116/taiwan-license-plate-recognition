@@ -35,6 +35,7 @@ result = model.val(
 	batch=-1,
 	imgsz=640,
 	device="cpu",
+	half=False,
 	split="test",
 	plots=True,
 )
