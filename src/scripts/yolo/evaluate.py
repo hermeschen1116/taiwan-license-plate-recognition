@@ -26,7 +26,7 @@ dataset = (
 
 model_path: str = run.use_model("license-plate-detection:latest")
 
-os.replace(model_path, f"{model_path}_openvino")
+os.replace(model_path, f"{model_path}_openvino_model")
 
 model = YOLO(f"{model_path}_openvino_model", task="obb")
 
