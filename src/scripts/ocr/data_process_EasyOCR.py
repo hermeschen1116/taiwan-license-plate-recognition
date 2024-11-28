@@ -1,4 +1,5 @@
 import os
+import shutil
 import tempfile
 from typing import Dict, List
 
@@ -12,9 +13,12 @@ load_dotenv()
 
 project_root: str = os.environ.get("PROJECT_ROOT", "")
 
-data_directory: str = f"{project_root}/datasets/ocr"
+data_source: str = f"{project_root}/datasets/ocr"
 
 with tempfile.TemporaryDirectory() as temp_dir:
+	data_directory: str = f"{temp_dir}/datasets"
+	shutil.copytree(data_source, data_directory, dirs_exist_ok=True)
+
 	data: List[Dict[str, str]] = [
 		{"label": file.split(".")[0], "image": os.path.join(data_directory, file)}
 		for file in os.listdir(data_directory)
