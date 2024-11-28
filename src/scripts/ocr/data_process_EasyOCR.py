@@ -45,4 +45,9 @@ with tempfile.TemporaryDirectory() as temp_dir:
 		num_proc=num_workers,
 	)
 
-	print(dataset["train"][0])
+	dataset.push_to_hub(
+		"taiwan-license-plate-ocr",
+		private=True,
+		num_shards={"train": 16, "validation": 16, "test": 16},
+		embed_external_files=True,
+	)
