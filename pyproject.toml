@@ -9,7 +9,6 @@ authors = [
 requires-python = ">=3.12"
 dependencies = [
 	"accelerate>=1.1.1",
-	"bitsandbytes>=0.44.1",
 	"easyocr>=1.7.2",
 	"opencv-python>=4.10.0.84",
 	"pillow>=11.0.0",
@@ -38,3 +37,6 @@ dev-dependencies = [
 	"roboflow>=1.1.48",
 	"wandb>=0.18.5",
 ]
+
+[project.optional-dependencies]
+cuda = ["bitsandbytes>=0.44.1"]
