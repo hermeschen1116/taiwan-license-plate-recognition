@@ -16,7 +16,7 @@ project_root: str = os.environ.get("PROJECT_ROOT", "")
 data_source: str = f"{project_root}/datasets/ocr"
 
 with tempfile.TemporaryDirectory() as temp_dir:
-	data_directory: str = f"{temp_dir}/datasets"
+	data_directory: str = f"{temp_dir}/data_source"
 	shutil.copytree(data_source, data_directory, dirs_exist_ok=True)
 
 	data: List[Dict[str, str]] = [
