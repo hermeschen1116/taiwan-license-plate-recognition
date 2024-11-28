@@ -36,6 +36,7 @@ dev-dependencies = [
 	"pre-commit>=4.0.1",
 	"python-dotenv>=1.0.1",
 	"roboflow>=1.1.48",
+	"tqdm>=4.67.1",
 	"wandb>=0.18.5",
 ]
 
