@@ -33,7 +33,7 @@ with tempfile.TemporaryDirectory() as temp_dir:
 	dataset = dataset.cast_column("image", Image(decode=False))
 
 	def contain_chinese(s: str) -> bool:
-		return "台北市" in s or "高雄市" in s or "台灣省" in s
+		return s[0:3] in ["台北市", "高雄市", "台灣省", "電動車"]
 
 	dataset = dataset.map(
 		lambda samples: {
