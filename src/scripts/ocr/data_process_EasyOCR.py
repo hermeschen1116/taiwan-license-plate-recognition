@@ -8,10 +8,12 @@ from dotenv import load_dotenv
 
 from datasets import DatasetDict
 from datasets.features.image import Image
+from taiwan_license_plate_recognition.helper import get_num_of_workers
 
 load_dotenv()
 
 project_root: str = os.environ.get("PROJECT_ROOT", "")
+num_workers: int = get_num_of_workers()
 
 data_source: str = f"{project_root}/datasets/ocr"
 
@@ -24,9 +26,20 @@ with tempfile.TemporaryDirectory() as temp_dir:
 		for file in os.listdir(data_directory)
 	]
 	polars.DataFrame(data).write_csv(f"{temp_dir}/data.csv")
+
 	dataset = DatasetDict.from_csv({"train": f"{temp_dir}/data.csv"})
 	dataset["train"], dataset["validation"] = dataset["train"].train_test_split(test_size=0.2).values()
 	dataset["train"], dataset["test"] = dataset["train"].train_test_split(test_size=0.125).values()
 	dataset = dataset.cast_column("image", Image(decode=False))
+
+	dataset = dataset.map(
+		lambda samples: {
+			"label_other": [label[:3] if not label[0].isalnum() else "" for label in samples],
+			"label": [label[3:] if not label[0].isalnum() else label for label in samples],
+		},
+		input_columns=["label"],
+		batched=True,
+		num_proc=num_workers,
+	)
 
 	print(dataset["train"][0])
