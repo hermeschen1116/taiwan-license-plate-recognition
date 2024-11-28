@@ -1,7 +1,7 @@
-cache-dir = "~/.cache/ruff"
 fix = true
 line-length = 120
 preview = true
+exclude = ["**/**/EasyOCR/**/**"]
 
 [analyze]
 detect-string-imports = true
