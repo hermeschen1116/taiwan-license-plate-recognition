@@ -1,5 +1,4 @@
 import os
-import random
 import shutil
 import tempfile
 from typing import Dict, List
@@ -7,13 +6,9 @@ from typing import Dict, List
 import polars
 from dotenv import load_dotenv
 
-from datasets import load_dataset
+from datasets import DatasetDict
+from datasets.features.image import Image
 from taiwan_license_plate_recognition.helper import get_num_of_workers
-
-
-def contain_chinese(s: str) -> bool:
-	return s[0:3] in ["台北市", "高雄市", "台灣省", "電動車"]
-
 
 load_dotenv()
 
@@ -23,38 +18,32 @@ num_workers: int = get_num_of_workers()
 data_source: str = f"{project_root}/datasets/ocr"
 
 with tempfile.TemporaryDirectory() as temp_dir:
-	files: List[str] = os.listdir(data_source)
-	num_files: int = len(files)
+	dataset_path: str = f"{temp_dir}/data_source"
+	shutil.copytree(data_source, dataset_path, dirs_exist_ok=True)
 
-	files = random.sample(files, num_files)
+	data: List[Dict[str, str]] = [
+		{"label": file.split(".")[0], "image": os.path.join(dataset_path, file)} for file in os.listdir(dataset_path)
+	]
+	polars.DataFrame(data).write_csv(f"{temp_dir}/data.csv")
 
-	num_train_split: int = int(num_files * 0.7)
-	num_validation_split: int = int(num_files * 0.2)
-	splits: Dict[str, List[str]] = {
-		"train": files[:num_train_split],
-		"validation": files[num_train_split : (num_train_split + num_validation_split)],
-		"test": files[(num_train_split + num_validation_split) :],
-	}
+	dataset = DatasetDict.from_csv({"train": f"{temp_dir}/data.csv"})
+	dataset["train"], dataset["validation"] = dataset["train"].train_test_split(test_size=0.2).values()
+	dataset["train"], dataset["test"] = dataset["train"].train_test_split(test_size=0.125).values()
+	dataset = dataset.cast_column("image", Image(decode=False))
 
-	dataset_path: str = f"{temp_dir}/datasets"
-	os.makedirs(dataset_path)
-	for split_name in splits.keys():
-		os.makedirs(f"{dataset_path}/{split_name}")
-		metadata: List[Dict[str, str]] = []
-		for file in splits[split_name]:
-			shutil.copyfile(os.path.join(data_source, file), f"{dataset_path}/{split_name}/{file}")
+	def contain_chinese(s: str) -> bool:
+		return s[0:3] in ["台北市", "高雄市", "台灣省", "電動車"]
 
-			label: str = file.split(".")[0]
-			label = label[3:] if contain_chinese(label) else label
-			label_other: str = label[:3] if contain_chinese(label) else ""
-			metadata.append({"file_name": file, "label": label, "label_other": label_other})
-		polars.DataFrame(metadata).write_csv(f"{dataset_path}/{split_name}/metadata.csv")
-
-	dataset = load_dataset("imagefolder", data_dir=dataset_path, save_infos=True, num_proc=num_workers)
+	dataset = dataset.map(
+		lambda samples: {
+			"label_other": [label[:3] if contain_chinese(label) else "" for label in samples],
+			"label": [label[3:] if contain_chinese(label) else label for label in samples],
+		},
+		input_columns=["label"],
+		batched=True,
+		num_proc=num_workers,
+	)
 
 	dataset.push_to_hub(
-		"taiwan-license-plate-ocr",
-		data_dir=dataset_path,
-		num_shards={"train": 16, "validation": 16, "test": 16},
-		embed_external_files=True,
+		"taiwan-license-plate-ocr", num_shards={"train": 8, "validation": 8, "test": 8}, embed_external_files=True
 	)
