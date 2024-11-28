@@ -1,11 +1,14 @@
 import os
 import tempfile
-from pprint import pprint
+from typing import Any, Dict
 
+import yaml
 from dotenv import load_dotenv
 from tqdm.auto import tqdm
 
 from datasets import Image, load_dataset
+from taiwan_license_plate_recognition.EasyOCR.trainer.train import train
+from taiwan_license_plate_recognition.EasyOCR.trainer.utils import AttrDict
 from taiwan_license_plate_recognition.helper import get_num_of_workers
 
 load_dotenv()
@@ -24,5 +27,12 @@ with tempfile.TemporaryDirectory() as dataset_directory:
 			sample["image"].save(f"{dataset_directory}/{split}/images/{sample['label']}.png")
 		dataset[split].to_csv(f"{dataset_directory}/{split}/label.csv", num_proc=num_workers)
 
-		pprint(os.listdir(f"{dataset_directory}/{split}/"))
-		pprint(os.listdir(f"{dataset_directory}/{split}/images")[0:10])
+	options: Dict[str, Any] = {}
+	with open(f"{project_root}/src/scripts/ocr/arguments/easyOCR.yaml", "r", encoding="utf8") as file:
+		options = AttrDict(yaml.safe_load(file))
+
+	options["character"] = options["number"] + options["symbol"] + options["lang_char"]
+
+	os.makedirs(f"./saved_models/{options['experiment_name']}", exist_ok=True)
+
+	train(options, amp=False)
