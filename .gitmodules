@@ -1,0 +1,3 @@
+[submodule "src/taiwan_license_plate_recognition/EasyOCR"]
+	path = src/taiwan_license_plate_recognition/EasyOCR
+	url = git@github.com:hermeschen1116/EasyOCR.git
