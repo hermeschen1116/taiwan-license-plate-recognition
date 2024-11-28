@@ -12,7 +12,7 @@ project_root: str = os.environ.get("PROJECT_ROOT", "")
 num_workers: int = get_num_of_workers()
 
 dataset = load_dataset("hermeschen1116/taiwan-license-plate-ocr", num_proc=num_workers)
-dataset = dataset.remove_columns(["label_other"]).unique()
+dataset = dataset.remove_columns(["label_other"]).unique("label")
 dataset = dataset.cast_column("image", Image(decode=True))
 
 dataset_directory = tempfile.TemporaryDirectory()
