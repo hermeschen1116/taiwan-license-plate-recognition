@@ -16,20 +16,33 @@ load_dotenv()
 project_root: str = os.environ.get("PROJECT_ROOT", "")
 num_workers: int = get_num_of_workers()
 
-dataset = load_dataset("hermeschen1116/taiwan-license-plate-ocr", num_proc=num_workers)
+dataset = load_dataset("hermeschen1116/taiwan-license-plate-ocr", keep_in_memory=True, num_proc=num_workers)
 dataset = dataset.remove_columns(["label_other"])
 dataset = dataset.cast_column("image", Image(decode=True))
+dataset = dataset.map(
+	lambda samples: {"filename": [f"{sample}.jpg" for sample in samples]},
+	input_columns=["label"],
+	batched=True,
+	num_proc=num_workers,
+)
+dataset = dataset.rename_column("label", "words")
+print(dataset.column_names)
 
-with tempfile.TemporaryDirectory() as dataset_directory:
+with tempfile.TemporaryDirectory() as run_directory:
 	for split in ["train", "validation", "test"]:
-		os.makedirs(f"{dataset_directory}/{split}/images")
+		os.makedirs(f"{run_directory}/{split}/images")
 		for sample in tqdm(dataset[split], desc=f"{split}: ", colour="green"):
-			sample["image"].save(f"{dataset_directory}/{split}/images/{sample['label']}.png")
-		dataset[split].to_csv(f"{dataset_directory}/{split}/label.csv", num_proc=num_workers)
+			sample["image"].save(f"{run_directory}/{split}/images/{sample['words']}.png")
+		dataset[split].remove_columns(["image"]).to_csv(
+			f"{run_directory}/{split}/images/labels.csv", num_proc=num_workers
+		)
 
 	options: Dict[str, Any] = {}
 	with open(f"{project_root}/src/scripts/ocr/arguments/easyOCR.yaml", "r", encoding="utf8") as file:
 		options = AttrDict(yaml.safe_load(file))
+
+	options["train_data"] = f"{run_directory}/train"
+	options["valid_data"] = f"{run_directory}/validation"
 
 	options["character"] = options["number"] + options["symbol"] + options["lang_char"]
 

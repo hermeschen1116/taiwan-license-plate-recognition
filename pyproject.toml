@@ -13,7 +13,7 @@ dependencies = [
 	"opencv-python>=4.10.0.84",
 	"pillow>=11.0.0",
 	"pytesseract>=0.3.13",
-	"torch>=2.4.1",
+	"torch==2.2.2",
 	"transformers>=4.44.2",
 	"ultralytics==8.0.238",
 ]
