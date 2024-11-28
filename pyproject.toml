@@ -32,6 +32,7 @@ dev-dependencies = [
 	"openvino-dev>=2024.5.0",
 	"optimum[nncf,openvino]>=1.23.3",
 	"pip>=24.3.1",
+	"polars>=1.15.0",
 	"pre-commit>=4.0.1",
 	"python-dotenv>=1.0.1",
 	"roboflow>=1.1.48",
