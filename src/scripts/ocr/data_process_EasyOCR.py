@@ -32,10 +32,13 @@ with tempfile.TemporaryDirectory() as temp_dir:
 	dataset["train"], dataset["test"] = dataset["train"].train_test_split(test_size=0.125).values()
 	dataset = dataset.cast_column("image", Image(decode=False))
 
+	def contain_chinese(s: str) -> bool:
+		return "台北市" in s or "高雄市" in s or "台灣省" in s
+
 	dataset = dataset.map(
 		lambda samples: {
-			"label_other": [label[:3] if not label[0].isalnum() else "" for label in samples],
-			"label": [label[3:] if not label[0].isalnum() else label for label in samples],
+			"label_other": [label[:3] if contain_chinese(label) else "" for label in samples],
+			"label": [label[3:] if contain_chinese(label) else label for label in samples],
 		},
 		input_columns=["label"],
 		batched=True,
