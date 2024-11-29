@@ -11,9 +11,10 @@ dependencies = [
 	"accelerate>=1.1.1",
 	"easyocr>=1.7.2",
 	"opencv-python>=4.10.0.84",
+	"peft>=0.13.2",
 	"pillow>=11.0.0",
 	"pytesseract>=0.3.13",
-	"torch==2.2.2",
+	"torch>=2.2.2",
 	"transformers>=4.44.2",
 	"ultralytics==8.0.238",
 ]
@@ -27,7 +28,9 @@ dev-dependencies = [
 	"catppuccin-jupyterlab>=0.2.4",
 	"commitizen>=3.30.0",
 	"datasets>=3.0.2",
+	"evaluate>=0.4.3",
 	"huggingface-hub>=0.26.2",
+	"jiwer>=3.0.5",
 	"jupyter>=1.1.1",
 	"openvino-dev>=2024.5.0",
 	"optimum[nncf,openvino]>=1.23.3",
@@ -36,8 +39,10 @@ dev-dependencies = [
 	"pre-commit>=4.0.1",
 	"python-dotenv>=1.0.1",
 	"roboflow>=1.1.48",
+	"setuptools>=75.6.0",
 	"tqdm>=4.67.1",
 	"wandb>=0.18.5",
+	"wheel>=0.45.1",
 ]
 
 [project.optional-dependencies]
