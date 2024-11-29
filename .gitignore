@@ -337,4 +337,4 @@ pyrightconfig.json
 # model file
 *.pt
 !**/**/models/*.pt
-
+**/**/checkpoints/
