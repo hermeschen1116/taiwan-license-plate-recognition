@@ -3,6 +3,7 @@ from typing import Dict
 
 import evaluate
 import torch
+import wandb
 from PIL.Image import Resampling
 from dotenv import load_dotenv
 from transformers import (
@@ -13,7 +14,6 @@ from transformers import (
 	VisionEncoderDecoderModel,
 )
 
-import wandb
 from datasets import Image, load_dataset
 from taiwan_license_plate_recognition.helper import get_num_of_workers, get_torch_device
 
@@ -115,7 +115,6 @@ trainer_arguments = Seq2SeqTrainingArguments(
 )
 
 cer_metric = evaluate.load("cer", keep_in_memory=True)
-accuracy_metric = evaluate.load("accuracy", keep_in_memory=True)
 
 
 def compute_metrics(eval_prediction) -> Dict[str, float]:
@@ -126,9 +125,8 @@ def compute_metrics(eval_prediction) -> Dict[str, float]:
 	label = processor.batch_decode(label_ids, skip_special_tokens=True)
 
 	cer_score = cer_metric.compute(predictions=prediction, references=label)
-	accuracy_score = accuracy_metric.compute(predictions=prediction, references=label)
 
-	return {"cer": cer_score, "accuracy": accuracy_score}
+	return {"cer": cer_score}
 
 
 trainer = Seq2SeqTrainer(
