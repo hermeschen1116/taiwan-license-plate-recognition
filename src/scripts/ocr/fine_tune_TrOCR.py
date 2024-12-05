@@ -91,7 +91,7 @@ trainer_arguments = Seq2SeqTrainingArguments(
 	eval_accumulation_steps=50,
 	run_name=run.name,
 	eval_delay=500,
-	num_train_epochs=10,
+	num_train_epochs=3,
 	lr_scheduler_type="reduce_lr_on_plateau",
 	logging_steps=25,
 	save_steps=25,
@@ -143,7 +143,15 @@ run.log(evaluate_result)
 model.push_to_hub("taiwan-license-plate-recognition")
 
 generation_config = GenerationConfig(
-	max_length=64, early_stopping=True, num_beams=4, length_penalty=2.0, no_repeat_ngram_size=3
+	decoder_start_token_id=processor.tokenizer.cls_token_id,
+	pad_token_id=processor.tokenizer.pad_token_id,
+	vocab_size=model.config.decoder.vocab_size,
+	eos_token_id=processor.tokenizer.sep_token_id,
+	max_length=64,
+	early_stopping=True,
+	num_beams=4,
+	length_penalty=2.0,
+	no_repeat_ngram_size=3,
 )
 generation_config.push_to_hub("taiwan-license-plate-recognition")
 
