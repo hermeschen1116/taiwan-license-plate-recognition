@@ -5,13 +5,7 @@ import evaluate
 import torch
 from PIL.Image import Resampling
 from dotenv import load_dotenv
-from transformers import (
-	GenerationConfig,
-	Seq2SeqTrainer,
-	Seq2SeqTrainingArguments,
-	TrOCRProcessor,
-	VisionEncoderDecoderModel,
-)
+from transformers import Seq2SeqTrainer, Seq2SeqTrainingArguments, TrOCRProcessor, VisionEncoderDecoderModel
 
 import wandb
 from datasets import Image, load_dataset
@@ -65,24 +59,20 @@ dataset = dataset.map(
 dataset.set_format("torch", columns=["pixel_values", "labels"], output_all_columns=True)
 
 model = VisionEncoderDecoderModel.from_pretrained(
-	"microsoft/trocr-base-printed", device_map=device, low_cpu_mem_usage=True
+	"DunnBC22/trocr-base-printed_license_plates_ocr",
+	torch_dtype=torch.bfloat16,
+	device_map=device,
+	low_cpu_mem_usage=True,
 )
 model.config.decoder_start_token_id = processor.tokenizer.cls_token_id
 model.config.pad_token_id = processor.tokenizer.pad_token_id
 model.config.vocab_size = model.config.decoder.vocab_size
 model.config.eos_token_id = processor.tokenizer.sep_token_id
-
-generation_config = GenerationConfig(
-	decoder_start_token_id=processor.tokenizer.cls_token_id,
-	pad_token_id=processor.tokenizer.pad_token_id,
-	vocab_size=model.config.decoder.vocab_size,
-	eos_token_id=processor.tokenizer.sep_token_id,
-	max_length=max_length,
-	early_stopping=True,
-	no_repeat_ngram_size=3,
-	length_penalty=2.0,
-	num_beams=4,
-)
+model.config.max_length = max_length
+model.config.early_stopping = True
+model.config.no_repeat_ngram_size = 3
+model.config.length_penalty = 2.0
+model.config.num_beams = 4
 
 trainer_arguments = Seq2SeqTrainingArguments(
 	output_dir=f"./checkpoints/{run.name}",
@@ -94,16 +84,16 @@ trainer_arguments = Seq2SeqTrainingArguments(
 	run_name=run.name,
 	eval_delay=500,
 	num_train_epochs=2,
-	lr_scheduler_type="reduce_lr_on_plateau",
+	# lr_scheduler_type="reduce_lr_on_plateau",
 	logging_steps=25,
 	save_steps=25,
 	save_total_limit=5,
 	load_best_model_at_end=True,
 	metric_for_best_model="cer",
 	greater_is_better=False,
-	bf16=False,
-	fp16=True,
-	optim="paged_adamw_32bit",
+	bf16=True,
+	fp16=False,
+	optim="paged_lion_32bit",
 	group_by_length=True,
 	report_to=["wandb"],
 	dataloader_pin_memory=True,
@@ -111,7 +101,8 @@ trainer_arguments = Seq2SeqTrainingArguments(
 	eval_on_start=True,
 	sortish_sampler=True,
 	predict_with_generate=True,
-	generation_config=generation_config,
+	generation_max_length=max_length,
+	generation_num_beams=4,
 )
 
 cer_metric = evaluate.load("cer", keep_in_memory=True)
