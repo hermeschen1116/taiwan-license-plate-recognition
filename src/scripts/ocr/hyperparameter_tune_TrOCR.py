@@ -6,13 +6,7 @@ import torch
 import wandb
 from PIL.Image import Resampling
 from dotenv import load_dotenv
-from transformers import (
-	GenerationConfig,
-	Seq2SeqTrainer,
-	Seq2SeqTrainingArguments,
-	TrOCRProcessor,
-	VisionEncoderDecoderModel,
-)
+from transformers import Seq2SeqTrainer, Seq2SeqTrainingArguments, TrOCRProcessor, VisionEncoderDecoderModel
 
 from datasets import Image, load_dataset
 from taiwan_license_plate_recognition.helper import get_num_of_workers, get_torch_device
@@ -24,12 +18,13 @@ num_workers: int = get_num_of_workers()
 device: str = get_torch_device()
 max_length: int = 64
 
-run = wandb.init(job_type="fine_tune", project="taiwan-license-plate-recognition", group="TrOCR")
+run = wandb.init(job_type="fine_tune", project="taiwan-license-plate-recognition", group="TrOCR", mode="offline")
 
 processor = TrOCRProcessor.from_pretrained("microsoft/trocr-base-printed", clean_up_tokenization_spaces=True)
 
 dataset = load_dataset("hermeschen1116/taiwan-license-plate-ocr", keep_in_memory=True, num_proc=num_workers)
 dataset = dataset.remove_columns(["label_other"])
+print(dataset)
 
 dataset = dataset.cast_column("image", Image(decode=True))
 
@@ -64,47 +59,56 @@ dataset = dataset.map(
 ).rename_column("label", "labels")
 dataset.set_format("torch", columns=["pixel_values", "labels"], output_all_columns=True)
 
-model = VisionEncoderDecoderModel.from_pretrained(
-	"DunnBC22/trocr-base-printed_license_plates_ocr", torch_dtype=torch.bfloat16, low_cpu_mem_usage=True
-)
-# set special tokens used for creating the decoder_input_ids from the labels
-model.config.decoder_start_token_id = processor.tokenizer.cls_token_id
-model.config.pad_token_id = processor.tokenizer.pad_token_id
-# make sure vocab size is set correctly
-model.config.vocab_size = model.config.decoder.vocab_size
 
-# set beam search parameters
-model.config.eos_token_id = processor.tokenizer.sep_token_id
-model.config.max_length = max_length
-model.config.early_stopping = True
-model.config.no_repeat_ngram_size = 3
-model.config.length_penalty = 2.0
-model.config.num_beams = 4
+def model_init():
+	model = VisionEncoderDecoderModel.from_pretrained(
+		"DunnBC22/trocr-base-printed_license_plates_ocr", torch_dtype=torch.bfloat16, low_cpu_mem_usage=True
+	)
+	# set special tokens used for creating the decoder_input_ids from the labels
+	model.config.decoder_start_token_id = processor.tokenizer.cls_token_id
+	model.config.pad_token_id = processor.tokenizer.pad_token_id
+	# make sure vocab size is set correctly
+	model.config.vocab_size = model.config.decoder.vocab_size
+
+	# set beam search parameters
+	model.config.eos_token_id = processor.tokenizer.sep_token_id
+	model.config.max_length = max_length
+	model.config.early_stopping = True
+	model.config.no_repeat_ngram_size = 3
+	model.config.length_penalty = 2.0
+	model.config.num_beams = 4
+
+	return model
 
 
 trainer_arguments = Seq2SeqTrainingArguments(
-	output_dir=f"./checkpoints/{run.name}",
+	output_dir="./checkpoints",
 	overwrite_output_dir=True,
 	eval_strategy="steps",
 	per_device_train_batch_size=4,
 	per_device_eval_batch_size=4,
 	eval_accumulation_steps=50,
-	run_name=run.name,
+	torch_empty_cache_steps=100,
 	eval_delay=500,
-	num_train_epochs=10,
-	lr_scheduler_type="reduce_lr_on_plateau",
+	# learning_rate=2e-4,
+	# weight_decay=0.001,
+	# max_grad_norm=0.3,
+	num_train_epochs=1,
+	lr_scheduler_type="linear",
+	# warmup_ratio=0.003,
 	logging_steps=25,
 	save_steps=25,
 	save_total_limit=5,
 	load_best_model_at_end=True,
 	metric_for_best_model="cer",
-	greater_is_better=False,
 	bf16=True,
 	fp16=False,
-	optim="paged_lion_32bit",
+	dataloader_num_workers=num_workers,
+	optim="paged_adamw_32bit",
 	group_by_length=True,
 	report_to=["wandb"],
 	dataloader_pin_memory=True,
+	dataloader_persistent_workers=True,
 	auto_find_batch_size=True,
 	eval_on_start=True,
 	sortish_sampler=True,
@@ -125,7 +129,7 @@ def compute_metrics(eval_prediction) -> Dict[str, float]:
 
 
 trainer = Seq2SeqTrainer(
-	model=model,
+	model_init=model_init,
 	tokenizer=processor.image_processor,
 	args=trainer_arguments,
 	compute_metrics=compute_metrics,
@@ -133,18 +137,8 @@ trainer = Seq2SeqTrainer(
 	eval_dataset=dataset["validation"],
 )
 
-trainer.train()
+trainer.hyperparameter_search()
 
-model = torch.compile(model, dynamic=True, backend="openvino", mode="reduce-overhead")
+wandb.finish()
 
-evaluate_result = trainer.evaluate(dataset["test"], metric_key_prefix="test")
-run.log(evaluate_result)
-
-model.push_to_hub("taiwan-license-plate-recognition")
-
-generation_config = GenerationConfig(
-	max_length=64, early_stopping=True, num_beams=4, length_penalty=2.0, no_repeat_ngram_size=3
-)
-generation_config.push_to_hub("taiwan-license-plate-recognition")
-
-run.finish()
+exit(0)
