@@ -73,7 +73,7 @@ end_time = time.time()
 print(f"Image File: {result}, execution time: {end_time - start_time}s")
 
 cer_metric = evaluate.load("cer", keep_in_memory=True)
-accuracy_metric = evaluate.load("exact_match", keep_in_memory=True)
+accuracy_metric = evaluate.load("accuracy", keep_in_memory=True)
 
 dataset = dataset.map(lambda sample: {"prediction": recognizer(sample)[0]["generated_text"]}, input_columns=["image"])
 

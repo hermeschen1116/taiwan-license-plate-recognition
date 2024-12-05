@@ -106,7 +106,7 @@ trainer_arguments = Seq2SeqTrainingArguments(
 )
 
 cer_metric = evaluate.load("cer", keep_in_memory=True)
-accuracy_metric = evaluate.load("exact_match", keep_in_memory=True)
+accuracy_metric = evaluate.load("accuracy", keep_in_memory=True)
 
 
 def compute_metrics(eval_prediction) -> Dict[str, float]:
