@@ -58,9 +58,7 @@ dataset = dataset.map(
 ).rename_column("label", "labels")
 dataset.set_format("torch", columns=["pixel_values", "labels"], output_all_columns=True)
 
-model = VisionEncoderDecoderModel.from_pretrained(
-	"DunnBC22/trocr-base-printed_license_plates_ocr", low_cpu_mem_usage=True
-)
+model = VisionEncoderDecoderModel.from_pretrained("microsoft/trocr-base-printed", low_cpu_mem_usage=True)
 # set special tokens used for creating the decoder_input_ids from the labels
 model.config.decoder_start_token_id = processor.tokenizer.cls_token_id
 model.config.pad_token_id = processor.tokenizer.pad_token_id
