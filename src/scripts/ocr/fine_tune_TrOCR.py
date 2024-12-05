@@ -18,7 +18,7 @@ num_workers: int = get_num_of_workers()
 device: str = get_torch_device()
 max_length: int = 64
 
-run = wandb.init(job_type="fine_tune", project="taiwan-license-plate-recognition", group="TrOCR", mode="offline")
+run = wandb.init(job_type="fine_tune", project="taiwan-license-plate-recognition", group="TrOCR")
 
 processor = TrOCRProcessor.from_pretrained("microsoft/trocr-base-printed", clean_up_tokenization_spaces=True)
 
@@ -137,6 +137,4 @@ run.log(evaluate_result)
 
 model.push_to_hub("taiwan-license-plate-recognition")
 
-wandb.finish()
-
-exit(0)
+run.finish()
