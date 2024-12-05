@@ -3,7 +3,6 @@ from typing import Dict
 
 import evaluate
 import torch
-import wandb
 from PIL.Image import Resampling
 from dotenv import load_dotenv
 from transformers import (
@@ -14,6 +13,7 @@ from transformers import (
 	VisionEncoderDecoderModel,
 )
 
+import wandb
 from datasets import Image, load_dataset
 from taiwan_license_plate_recognition.helper import get_num_of_workers, get_torch_device
 
@@ -93,7 +93,7 @@ trainer_arguments = Seq2SeqTrainingArguments(
 	eval_accumulation_steps=50,
 	run_name=run.name,
 	eval_delay=500,
-	num_train_epochs=10,
+	num_train_epochs=2,
 	lr_scheduler_type="reduce_lr_on_plateau",
 	logging_steps=25,
 	save_steps=25,
