@@ -4,6 +4,7 @@ from PIL import Image
 from dotenv import load_dotenv
 from optimum.intel import OVModelForVision2Seq
 from transformers import TrOCRProcessor
+from transformers.pipelines import ImageToTextPipeline
 
 from taiwan_license_plate_recognition.helper import get_num_of_workers, get_torch_device
 
@@ -21,13 +22,18 @@ test_image_path: str = f"{project_root}/datasets/ocr/高雄市ZS-0786.jpg"
 image = Image.open(test_image_path)
 
 model = OVModelForVision2Seq.from_pretrained(
-	"DunnBC22/trocr-base-printed_license_plates_ocr", export=True, device="cpu"
+	"hermeschen1116/taiwan-license-plate-recognition", export=True, device="cpu"
 )
 
-encode_image = processor(image.convert("RGB"), return_tensors="pt").pixel_values
+recognizer = ImageToTextPipeline(
+	model=model,
+	tokenizer=processor.tokenizer,
+	image_processor=processor,
+	framework="pt",
+	tast="image-to-text",
+	num_workers=num_workers,
+	torch_dtype="auto",
+)
 
-generated_ids = model.generate(encode_image, max_length=max_length)
-
-result = processor.batch_decode(generated_ids, skip_special_tokens=True)[0]
-
-print(result)
+print(f"Loaded Image: {recognizer(image)}")
+print(f"Image File: {recognizer(test_image_path)}")
