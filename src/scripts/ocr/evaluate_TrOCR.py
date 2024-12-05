@@ -42,7 +42,7 @@ dataset = dataset.map(
 processor = TrOCRProcessor.from_pretrained("microsoft/trocr-base-printed", clean_up_tokenization_spaces=True)
 
 quantization_config = OVWeightQuantizationConfig()
-ov_config = {"PERFORMANCE_HINT": "LATENCY", "CACHE_DIR": f"{project_root}/.ov_cache"}
+ov_config = {"PERFORMANCE_HINT": "LATENCY"}
 
 model = OVModelForVision2Seq.from_pretrained(
 	"hermeschen1116/taiwan-license-plate-recognition",

@@ -84,7 +84,7 @@ trainer_arguments = Seq2SeqTrainingArguments(
 	run_name=run.name,
 	eval_delay=500,
 	num_train_epochs=2,
-	# lr_scheduler_type="reduce_lr_on_plateau",
+	lr_scheduler_type="reduce_lr_on_plateau",
 	logging_steps=25,
 	save_steps=25,
 	save_total_limit=5,
@@ -101,8 +101,6 @@ trainer_arguments = Seq2SeqTrainingArguments(
 	eval_on_start=True,
 	sortish_sampler=True,
 	predict_with_generate=True,
-	generation_max_length=max_length,
-	generation_num_beams=4,
 )
 
 cer_metric = evaluate.load("cer", keep_in_memory=True)
