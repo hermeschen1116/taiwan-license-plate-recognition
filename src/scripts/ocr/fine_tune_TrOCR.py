@@ -5,7 +5,13 @@ import evaluate
 import torch
 from PIL.Image import Resampling
 from dotenv import load_dotenv
-from transformers import Seq2SeqTrainer, Seq2SeqTrainingArguments, TrOCRProcessor, VisionEncoderDecoderModel
+from transformers import (
+	GenerationConfig,
+	Seq2SeqTrainer,
+	Seq2SeqTrainingArguments,
+	TrOCRProcessor,
+	VisionEncoderDecoderModel,
+)
 
 import wandb
 from datasets import Image, load_dataset
@@ -58,21 +64,25 @@ dataset = dataset.map(
 ).rename_column("label", "labels")
 dataset.set_format("torch", columns=["pixel_values", "labels"], output_all_columns=True)
 
-model = VisionEncoderDecoderModel.from_pretrained("microsoft/trocr-base-printed", low_cpu_mem_usage=True)
-# set special tokens used for creating the decoder_input_ids from the labels
+model = VisionEncoderDecoderModel.from_pretrained(
+	"microsoft/trocr-base-printed", device_map=device, low_cpu_mem_usage=True
+)
 model.config.decoder_start_token_id = processor.tokenizer.cls_token_id
 model.config.pad_token_id = processor.tokenizer.pad_token_id
-# make sure vocab size is set correctly
 model.config.vocab_size = model.config.decoder.vocab_size
-
-# set beam search parameters
 model.config.eos_token_id = processor.tokenizer.sep_token_id
-model.config.max_length = max_length
-model.config.early_stopping = True
-model.config.no_repeat_ngram_size = 3
-model.config.length_penalty = 2.0
-model.config.num_beams = 4
 
+generation_config = GenerationConfig(
+	decoder_start_token_id=processor.tokenizer.cls_token_id,
+	pad_token_id=processor.tokenizer.pad_token_id,
+	vocab_size=model.config.decoder.vocab_size,
+	eos_token_id=processor.tokenizer.sep_token_id,
+	max_length=max_length,
+	early_stopping=True,
+	no_repeat_ngram_size=3,
+	length_penalty=2.0,
+	num_beams=4,
+)
 
 trainer_arguments = Seq2SeqTrainingArguments(
 	output_dir=f"./checkpoints/{run.name}",
@@ -101,6 +111,7 @@ trainer_arguments = Seq2SeqTrainingArguments(
 	eval_on_start=True,
 	sortish_sampler=True,
 	predict_with_generate=True,
+	generation_config=generation_config,
 )
 
 cer_metric = evaluate.load("cer", keep_in_memory=True)
