@@ -5,13 +5,7 @@ import evaluate
 import torch
 from PIL.Image import Resampling
 from dotenv import load_dotenv
-from transformers import (
-	GenerationConfig,
-	Seq2SeqTrainer,
-	Seq2SeqTrainingArguments,
-	TrOCRProcessor,
-	VisionEncoderDecoderModel,
-)
+from transformers import Seq2SeqTrainer, Seq2SeqTrainingArguments, TrOCRProcessor, VisionEncoderDecoderModel
 
 import wandb
 from datasets import Image, load_dataset
@@ -57,7 +51,7 @@ def encode_label(label):
 
 
 dataset = dataset.map(
-	lambda samples: {"label": [encode_label(sample) for sample in samples]},
+	lambda samples: {"label": [encode_label(sample.replace("-", "")) for sample in samples]},
 	input_columns=["label"],
 	batched=True,
 	num_proc=num_workers,
@@ -65,7 +59,7 @@ dataset = dataset.map(
 dataset.set_format("torch", columns=["pixel_values", "labels"], output_all_columns=True)
 
 model = VisionEncoderDecoderModel.from_pretrained(
-	"DunnBC22/trocr-base-printed_license_plates_ocr", torch_dtype=torch.bfloat16, low_cpu_mem_usage=True
+	"hermeschen1116/taiwan-license-plate-recognition", torch_dtype=torch.bfloat16, low_cpu_mem_usage=True
 )
 # set special tokens used for creating the decoder_input_ids from the labels
 model.config.decoder_start_token_id = processor.tokenizer.cls_token_id
@@ -91,7 +85,7 @@ trainer_arguments = Seq2SeqTrainingArguments(
 	eval_accumulation_steps=50,
 	run_name=run.name,
 	eval_delay=500,
-	num_train_epochs=3,
+	num_train_epochs=10,
 	lr_scheduler_type="reduce_lr_on_plateau",
 	logging_steps=25,
 	save_steps=25,
@@ -112,6 +106,7 @@ trainer_arguments = Seq2SeqTrainingArguments(
 )
 
 cer_metric = evaluate.load("cer", keep_in_memory=True)
+accuracy_metric = evaluate.load("accuracy", keep_in_memory=True)
 
 
 def compute_metrics(eval_prediction) -> Dict[str, float]:
@@ -121,7 +116,10 @@ def compute_metrics(eval_prediction) -> Dict[str, float]:
 	label_ids[label_ids == -100] = processor.tokenizer.pad_token_id
 	label = processor.batch_decode(label_ids, skip_special_tokens=True)
 
-	return {"cer": cer_metric.compute(predictions=prediction, references=label)}
+	cer_score = cer_metric.compute(predictions=prediction, references=label)
+	accuracy_score = accuracy_metric.compute(predictions=prediction, references=label)
+
+	return {"cer": cer_score, "accuracy": accuracy_score}
 
 
 trainer = Seq2SeqTrainer(
@@ -141,18 +139,5 @@ evaluate_result = trainer.evaluate(dataset["test"], metric_key_prefix="test")
 run.log(evaluate_result)
 
 model.push_to_hub("taiwan-license-plate-recognition")
-
-generation_config = GenerationConfig(
-	decoder_start_token_id=processor.tokenizer.cls_token_id,
-	pad_token_id=processor.tokenizer.pad_token_id,
-	vocab_size=model.config.decoder.vocab_size,
-	eos_token_id=processor.tokenizer.sep_token_id,
-	max_length=64,
-	early_stopping=True,
-	num_beams=4,
-	length_penalty=2.0,
-	no_repeat_ngram_size=3,
-)
-generation_config.push_to_hub("taiwan-license-plate-recognition")
 
 run.finish()

@@ -56,4 +56,5 @@ run = wandb.init(project="taiwan-license-plate-recognition", id=run.id, resume=T
 path_to_model: str = model.export(format="openvino", imgsz=640, half=True, batch=1, dynamic=True, device="cpu")
 run.log_model(f"{project_root}/{path_to_model}", name="license-plate-detection")
 
+
 wandb.finish()
