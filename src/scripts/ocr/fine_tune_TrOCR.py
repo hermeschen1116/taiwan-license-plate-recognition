@@ -3,7 +3,6 @@ from typing import Dict
 
 import evaluate
 import torch
-import wandb
 from PIL.Image import Resampling
 from dotenv import load_dotenv
 from transformers import (
@@ -14,6 +13,7 @@ from transformers import (
 	VisionEncoderDecoderModel,
 )
 
+import wandb
 from datasets import Image, load_dataset
 from taiwan_license_plate_recognition.helper import get_num_of_workers, get_torch_device
 
