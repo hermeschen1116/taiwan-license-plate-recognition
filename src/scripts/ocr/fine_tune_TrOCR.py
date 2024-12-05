@@ -3,11 +3,11 @@ from typing import Dict
 
 import evaluate
 import torch
-import wandb
 from PIL.Image import Resampling
 from dotenv import load_dotenv
 from transformers import Seq2SeqTrainer, Seq2SeqTrainingArguments, TrOCRProcessor, VisionEncoderDecoderModel
 
+import wandb
 from datasets import Image, load_dataset
 from taiwan_license_plate_recognition.helper import get_num_of_workers, get_torch_device
 
@@ -59,7 +59,7 @@ dataset = dataset.map(
 dataset.set_format("torch", columns=["pixel_values", "labels"], output_all_columns=True)
 
 model = VisionEncoderDecoderModel.from_pretrained(
-	"DunnBC22/trocr-base-printed_license_plates_ocr", torch_dtype=torch.float16, low_cpu_mem_usage=True
+	"DunnBC22/trocr-base-printed_license_plates_ocr", torch_dtype=torch.bfloat16, low_cpu_mem_usage=True
 )
 # set special tokens used for creating the decoder_input_ids from the labels
 model.config.decoder_start_token_id = processor.tokenizer.cls_token_id
@@ -93,8 +93,8 @@ trainer_arguments = Seq2SeqTrainingArguments(
 	load_best_model_at_end=True,
 	metric_for_best_model="cer",
 	greater_is_better=False,
-	bf16=False,
-	fp16=True,
+	bf16=True,
+	fp16=False,
 	optim="paged_lion_32bit",
 	group_by_length=True,
 	report_to=["wandb"],
