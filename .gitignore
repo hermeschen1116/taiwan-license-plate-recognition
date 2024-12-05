@@ -339,3 +339,4 @@ pyrightconfig.json
 !**/**/models/*.pt
 **/**/checkpoints/
 **/**/.ov_cache/
+**/**/artifacts/
