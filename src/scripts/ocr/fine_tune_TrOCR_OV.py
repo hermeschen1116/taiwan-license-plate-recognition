@@ -1,6 +1,5 @@
 import os
 
-import wandb
 from PIL import Image
 from dotenv import load_dotenv
 from optimum.intel import OVModelForVision2Seq
@@ -15,8 +14,6 @@ num_workers: int = get_num_of_workers()
 device: str = get_torch_device()
 max_length: int = 64
 
-run = wandb.init(job_type="fine_tune", project="taiwan-license-plate-recognition", group="TrOCR")
-
 processor = TrOCRProcessor.from_pretrained("microsoft/trocr-base-printed", clean_up_tokenization_spaces=True)
 
 test_image_path: str = f"{project_root}/datasets/ocr/高雄市ZS-0786.jpg"
@@ -29,7 +26,7 @@ model = OVModelForVision2Seq.from_pretrained(
 
 encode_image = processor(image.convert("RGB"), return_tensors="pt").pixel_values
 
-generated_ids = model.generate(encode_image, max_length=20)
+generated_ids = model.generate(encode_image, max_length=max_length)
 
 result = processor.batch_decode(generated_ids, skip_special_tokens=True)[0]
 
