@@ -1,11 +1,10 @@
 import os
 import shutil
 
+import wandb
 from dotenv import load_dotenv
 from roboflow import Roboflow
 from ultralytics import YOLO
-
-import wandb
 from wandb.integration.ultralytics import add_wandb_callback
 
 load_dotenv()
