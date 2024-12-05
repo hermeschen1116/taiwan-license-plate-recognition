@@ -59,7 +59,7 @@ dataset = dataset.map(
 dataset.set_format("torch", columns=["pixel_values", "labels"], output_all_columns=True)
 
 model = VisionEncoderDecoderModel.from_pretrained(
-	"DunnBC22/trocr-base-printed_license_plates_ocr", torch_dtype=torch.bfloat16, low_cpu_mem_usage=True
+	"DunnBC22/trocr-base-printed_license_plates_ocr", low_cpu_mem_usage=True
 )
 # set special tokens used for creating the decoder_input_ids from the labels
 model.config.decoder_start_token_id = processor.tokenizer.cls_token_id
@@ -93,9 +93,9 @@ trainer_arguments = Seq2SeqTrainingArguments(
 	load_best_model_at_end=True,
 	metric_for_best_model="cer",
 	greater_is_better=False,
-	bf16=True,
-	fp16=False,
-	optim="paged_lion_32bit",
+	bf16=False,
+	fp16=True,
+	optim="paged_adamw_32bit",
 	group_by_length=True,
 	report_to=["wandb"],
 	dataloader_pin_memory=True,
