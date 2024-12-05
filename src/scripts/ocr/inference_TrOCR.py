@@ -30,7 +30,7 @@ recognizer = ImageToTextPipeline(
 	tokenizer=processor.tokenizer,
 	image_processor=processor,
 	framework="pt",
-	tast="image-to-text",
+	task="image-to-text",
 	num_workers=num_workers,
 	torch_dtype="auto",
 )
