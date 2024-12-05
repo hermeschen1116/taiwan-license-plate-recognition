@@ -24,7 +24,6 @@ processor = TrOCRProcessor.from_pretrained("microsoft/trocr-base-printed", clean
 
 dataset = load_dataset("hermeschen1116/taiwan-license-plate-ocr", keep_in_memory=True, num_proc=num_workers)
 dataset = dataset.remove_columns(["label_other"])
-print(dataset)
 
 dataset = dataset.cast_column("image", Image(decode=True))
 
