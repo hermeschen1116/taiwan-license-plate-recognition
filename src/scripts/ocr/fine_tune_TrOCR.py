@@ -59,7 +59,7 @@ dataset = dataset.map(
 dataset.set_format("torch", columns=["pixel_values", "labels"], output_all_columns=True)
 
 model = VisionEncoderDecoderModel.from_pretrained(
-	"hermeschen1116/taiwan-license-plate-recognition", torch_dtype=torch.bfloat16, low_cpu_mem_usage=True
+	"DunnBC22/trocr-base-printed_license_plates_ocr", torch_dtype=torch.bfloat16, low_cpu_mem_usage=True
 )
 # set special tokens used for creating the decoder_input_ids from the labels
 model.config.decoder_start_token_id = processor.tokenizer.cls_token_id
@@ -106,7 +106,7 @@ trainer_arguments = Seq2SeqTrainingArguments(
 )
 
 cer_metric = evaluate.load("cer", keep_in_memory=True)
-accuracy_metric = evaluate.load("accuracy", keep_in_memory=True)
+accuracy_metric = evaluate.load("exact_match", keep_in_memory=True)
 
 
 def compute_metrics(eval_prediction) -> Dict[str, float]:
@@ -134,9 +134,6 @@ trainer = Seq2SeqTrainer(
 trainer.train()
 
 model = torch.compile(model, dynamic=True, backend="openvino", mode="reduce-overhead")
-
-evaluate_result = trainer.evaluate(dataset["test"], metric_key_prefix="test")
-run.log(evaluate_result)
 
 model.push_to_hub("taiwan-license-plate-recognition")
 

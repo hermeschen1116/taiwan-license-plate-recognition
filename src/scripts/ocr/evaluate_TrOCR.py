@@ -32,13 +32,20 @@ dataset = dataset.remove_columns(["label_other"])
 
 dataset = dataset.cast_column("image", datasets.Image(decode=True))
 
+dataset = dataset.map(
+	lambda samples: {"label": [sample.replace("-", "") for sample in samples]},
+	input_columns=["label"],
+	batched=True,
+	num_proc=num_workers,
+)
+
 processor = TrOCRProcessor.from_pretrained("microsoft/trocr-base-printed", clean_up_tokenization_spaces=True)
 
 quantization_config = OVWeightQuantizationConfig()
 ov_config = {"PERFORMANCE_HINT": "LATENCY", "CACHE_DIR": "./ov_cache"}
 
 model = OVModelForVision2Seq.from_pretrained(
-	"DunnBC22/trocr-base-printed_license_plates_ocr",
+	"hermeschen1116/taiwan-license-plate-recognition",
 	export=True,
 	ov_config=ov_config,
 	quantization_config=quantization_config,
@@ -66,12 +73,14 @@ end_time = time.time()
 print(f"Image File: {result}, execution time: {end_time - start_time}s")
 
 cer_metric = evaluate.load("cer", keep_in_memory=True)
+accuracy_metric = evaluate.load("exact_match", keep_in_memory=True)
 
 dataset = dataset.map(lambda sample: {"prediction": recognizer(sample)[0]["generated_text"]}, input_columns=["image"])
 
 cer_score = cer_metric.compute(predictions=dataset["prediction"], references=dataset["label"])
+accuracy_score = cer_metric.compute(predictions=dataset["prediction"], references=dataset["label"])
 
-run.log({"test/cer": cer_score})
+run.log({"test/cer": cer_score, "test/accuracy": accuracy_score})
 
 result = wandb.Table(dataframe=dataset.remove_columns(["image"]).to_pandas())
 run.log({"evaluation_result": result})
