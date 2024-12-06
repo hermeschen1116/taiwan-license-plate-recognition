@@ -2,6 +2,7 @@ import logging
 import os
 from typing import List
 
+import requests
 from dotenv import load_dotenv
 from optimum.intel import OVModelForVision2Seq, OVWeightQuantizationConfig
 from transformers import TrOCRProcessor
@@ -20,6 +21,7 @@ ocr_model_path: str = os.environ.get("OCR_MODEL_PATH", ocr_processor_path)
 logging.info(f"{program_name}: OCR_MODEL_PATH: {ocr_model_path}")
 stream_path: str = os.environ.get("CAMERA_ADDRESS", "")
 logging.info(f"{program_name}: CAMERA_ADDRESS: {stream_path}")
+api: str = os.environ.get("API", "")
 
 logging.info(f"{program_name}: Initialize YOLO model.")
 yolo_model = YOLO(yolo_model_path, task="obb")
@@ -41,3 +43,4 @@ for result in yolo_model.predict(stream_path, stream=True, stream_buffer=True, d
 	license_numbers: List[str] = extract_license_number(cropped_images, ocr_model, ocr_processor)
 	logging.info(f"{program_name}: License number: {', '.join(license_numbers)}")
 	print(f"{program_name}: License number: {', '.join(license_numbers)}")
+	requests.post(f"{api}{license_numbers[0]}")
