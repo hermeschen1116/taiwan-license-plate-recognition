@@ -1,17 +1,16 @@
 import os
-import time
 
 import evaluate
 from PIL import Image
 from dotenv import load_dotenv
 from optimum.intel import OVModelForVision2Seq, OVWeightQuantizationConfig
 from transformers import TrOCRProcessor
-from transformers.pipelines import ImageToTextPipeline
 
 import datasets
 import wandb
 from datasets import load_dataset
 from taiwan_license_plate_recognition.Helper import get_num_of_workers
+from taiwan_license_plate_recognition.Utils import extract_license_number
 
 load_dotenv()
 
@@ -52,30 +51,15 @@ model = OVModelForVision2Seq.from_pretrained(
 	device="cpu",
 )
 
-recognizer = ImageToTextPipeline(
-	model=model,
-	tokenizer=processor.tokenizer,
-	image_processor=processor,
-	framework="pt",
-	task="image-to-text",
-	num_workers=num_workers,
-	device="cpu",
-	torch_dtype="auto",
-)
-
-start_time = time.time()
-result = recognizer(image)
-end_time = time.time()
-print(f"Loaded Image: {result}, execution time: {end_time - start_time}s")
-start_time = time.time()
-result = recognizer(test_image_path)
-end_time = time.time()
-print(f"Image File: {result}, execution time: {end_time - start_time}s")
-
 cer_metric = evaluate.load("cer", keep_in_memory=True)
 accuracy_metric = evaluate.load("accuracy", keep_in_memory=True)
 
-dataset = dataset.map(lambda sample: {"prediction": recognizer(sample)[0]["generated_text"]}, input_columns=["image"])
+dataset = dataset.map(
+	lambda samples: {"prediction": extract_license_number(samples, model, processor)},
+	input_columns=["image"],
+	batched=True,
+	batch_size=4,
+)
 
 cer_score = cer_metric.compute(predictions=dataset["prediction"], references=dataset["label"])
 accuracy_score = cer_metric.compute(predictions=dataset["prediction"], references=dataset["label"])
