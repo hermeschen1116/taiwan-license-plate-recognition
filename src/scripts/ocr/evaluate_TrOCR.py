@@ -11,7 +11,7 @@ from transformers.pipelines import ImageToTextPipeline
 import datasets
 import wandb
 from datasets import load_dataset
-from taiwan_license_plate_recognition.helper import get_num_of_workers
+from taiwan_license_plate_recognition.Helper import get_num_of_workers
 
 load_dotenv()
 
@@ -42,7 +42,7 @@ dataset = dataset.map(
 processor = TrOCRProcessor.from_pretrained("microsoft/trocr-base-printed", clean_up_tokenization_spaces=True)
 
 quantization_config = OVWeightQuantizationConfig()
-ov_config = {"PERFORMANCE_HINT": "LATENCY"}
+ov_config = {"PERFORMANCE_HINT": "LATENCY", "CACHE_DIR": f"{project_root}/.ov_cache"}
 
 model = OVModelForVision2Seq.from_pretrained(
 	"hermeschen1116/taiwan-license-plate-recognition",

@@ -5,7 +5,7 @@ from roboflow import Roboflow
 from ultralytics import YOLO
 
 import wandb
-from taiwan_license_plate_recognition.helper import get_num_of_workers, get_torch_device
+from taiwan_license_plate_recognition.Helper import get_num_of_workers, get_torch_device
 from wandb.integration.ultralytics import add_wandb_callback
 
 load_dotenv()
