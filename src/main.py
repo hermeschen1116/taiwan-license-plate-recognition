@@ -1,8 +1,8 @@
 import logging
 import os
-import subprocess
 from typing import List
 
+import requests
 from dotenv import load_dotenv
 from optimum.intel import OVModelForVision2Seq, OVWeightQuantizationConfig
 from transformers import TrOCRProcessor
@@ -43,4 +43,5 @@ for result in yolo_model.predict(stream_path, stream=True, stream_buffer=True, d
 	license_numbers: List[str] = extract_license_number(cropped_images, ocr_model, ocr_processor)
 	logging.info(f"{program_name}: License number: {', '.join(license_numbers)}")
 	print(f"{program_name}: License number: {', '.join(license_numbers)}")
-	subprocess.run(["curl", "-d", f"名稱=車牌辨識&車牌號碼={license_numbers[0]}", api])
+	requests.post(api, data={"名稱": "車牌辨識", "車牌號碼": license_numbers[0]})
+	# subprocess.run(["curl", "-d", f"名稱=車牌辨識&車牌號碼={license_numbers[0]}", api])
