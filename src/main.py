@@ -40,3 +40,4 @@ for result in yolo_model.predict(stream_path, stream=True, device="cpu"):
 	cropped_images = extract_license_plate(result)
 	license_numbers: List[str] = extract_license_number(cropped_images, ocr_model, ocr_processor)
 	logging.info(f"{program_name}: License number: {', '.join(license_numbers)}")
+	print(license_numbers)
