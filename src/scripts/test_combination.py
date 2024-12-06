@@ -10,7 +10,7 @@ from transformers import ImageToTextPipeline, TrOCRProcessor
 from ultralytics import YOLO
 
 import wandb
-from taiwan_license_plate_recognition.helper import get_num_of_workers
+from taiwan_license_plate_recognition.Helper import get_num_of_workers
 
 load_dotenv()
 

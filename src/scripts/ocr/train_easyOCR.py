@@ -9,7 +9,7 @@ from tqdm.auto import tqdm
 from datasets import Image, load_dataset
 from taiwan_license_plate_recognition.EasyOCR.trainer.train import train
 from taiwan_license_plate_recognition.EasyOCR.trainer.utils import AttrDict
-from taiwan_license_plate_recognition.helper import get_num_of_workers
+from taiwan_license_plate_recognition.Helper import get_num_of_workers
 
 load_dotenv()
 
