@@ -65,10 +65,7 @@ dataset = dataset.map(
 dataset.set_format("torch", columns=["pixel_values", "labels"], output_all_columns=True)
 
 model = VisionEncoderDecoderModel.from_pretrained(
-	"DunnBC22/trocr-base-printed_license_plates_ocr",
-	torch_dtype=torch.bfloat16,
-	# device_map=device,
-	low_cpu_mem_usage=True,
+	"DunnBC22/trocr-base-printed_license_plates_ocr", torch_dtype=torch.bfloat16, low_cpu_mem_usage=True
 )
 # set special tokens used for creating the decoder_input_ids from the labels
 model.config.decoder_start_token_id = processor.tokenizer.cls_token_id
@@ -140,7 +137,7 @@ trainer = Seq2SeqTrainer(
 
 trainer.train()
 
-# model = torch.compile(model, dynamic=True, backend="openvino", mode="reduce-overhead")
+model = torch.compile(model, dynamic=True, backend="openvino", mode="reduce-overhead")
 
 trainer.evaluate(dataset["test"], metric_key_prefix="test")
 
