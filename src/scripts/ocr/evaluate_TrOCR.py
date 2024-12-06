@@ -1,7 +1,6 @@
 import os
 
 import evaluate
-from PIL import Image
 from dotenv import load_dotenv
 from optimum.intel import OVModelForVision2Seq, OVWeightQuantizationConfig
 from transformers import TrOCRProcessor
@@ -19,10 +18,6 @@ num_workers: int = get_num_of_workers()
 max_length: int = 64
 
 run = wandb.init(job_type="evaluate", project="taiwan-license-plate-recognition", group="TrOCR")
-
-test_image_path: str = f"{project_root}/datasets/ocr/高雄市ZS-0786.jpg"
-
-image = Image.open(test_image_path)
 
 dataset = load_dataset(
 	"hermeschen1116/taiwan-license-plate-ocr", split="test", keep_in_memory=True, num_proc=num_workers
