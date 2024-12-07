@@ -21,7 +21,9 @@ def extract_license_plate(result) -> List[Image.Image]:
 
 
 def extract_license_number_paddleocr(images: List[Image.Image], model=None) -> List[str]:
-	results = [model.ocr(numpy.asarray(image, dtype=numpy.uint8))[0] for image in images]
+	image_arrays = [cv2.cvtColor(numpy.asarray(image, dtype=numpy.uint8), cv2.COLOR_RGB2BGR) for image in images]
+
+	results = [model.ocr(image)[0] for image in image_arrays]
 
 	return [
 		filter_license_number([(result[i][1][0]) for i in range(len(result))]) if result is not None else ""
