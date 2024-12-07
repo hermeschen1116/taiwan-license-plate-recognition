@@ -14,7 +14,7 @@ def crop_image(image: MatLike, bounded_box: torch.Tensor) -> MatLike:
 
 
 def remove_non_alphanum(s: str) -> str:
-	return s.translate(str.maketrans("", "", punctuation))
+	return s.translate(str.maketrans("", "", punctuation)).replace(" ", "")
 
 
 def filter_license_number(candidates: List[str]) -> str:
