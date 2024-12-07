@@ -15,6 +15,7 @@ load_dotenv()
 num_workers: int = get_num_of_workers()
 
 program_name: str = "LICENSE NUMBER RECOGNIZER"
+image_size: int = os.environ.get("IMAGE_SIZE", 640)
 yolo_model_path: str = os.environ.get("YOLO_MODEL_PATH", "")
 logging.info(f"{program_name}: YOLO_MODEL_PATH: {yolo_model_path}")
 # ocr_processor_path: str = os.environ.get("OCR_PROCESSOR_PATH", "microsoft/trocr-base-printed")
@@ -44,7 +45,7 @@ reader = PaddleOCR(lang="en", use_angle_cls=True, total_processes_num=num_worker
 
 logging.info(f"{program_name}: Start detecting")
 for result in yolo_model.predict(stream_path, stream=True, stream_buffer=True, device="cpu"):
-	cropped_images = extract_license_plate(result)
+	cropped_images = extract_license_plate(result, image_size)
 	license_numbers: List[str] = extract_license_number_paddleocr(cropped_images, reader)
 	logging.info(f"{program_name}: License number: {', '.join(license_numbers)}")
 	print(f"{program_name}: License number: {', '.join(license_numbers)}")
