@@ -1,9 +1,10 @@
 from typing import List
 
 import cv2
+import numpy
 from PIL import Image
 
-from taiwan_license_plate_recognition.PostProcess import crop_image, remove_non_alphanum
+from taiwan_license_plate_recognition.PostProcess import crop_image, filter_license_number, remove_non_alphanum
 from taiwan_license_plate_recognition.Preprocess import affine_transform
 
 
@@ -19,7 +20,18 @@ def extract_license_plate(result) -> List[Image.Image]:
 	return license_plates
 
 
-def extract_license_number(images: List[Image.Image], model=None, processor=None, max_length: int = 64) -> List[str]:
+def extract_license_number_paddleocr(images: List[Image.Image], model=None) -> List[str]:
+	results = [model.ocr(numpy.asarray(image, dtype=numpy.uint8))[0] for image in images]
+
+	return [
+		filter_license_number([(result[i][1][0]) for i in range(len(result))]) if result is not None else ""
+		for result in results
+	]
+
+
+def extract_license_number_trocr(
+	images: List[Image.Image], model=None, processor=None, max_length: int = 64
+) -> List[str]:
 	if len(images) == 0:
 		return []
 

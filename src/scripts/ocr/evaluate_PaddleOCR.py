@@ -1,56 +1,60 @@
 import os
 
+import cv2
 import evaluate
+import numpy
 import wandb
 from dotenv import load_dotenv
-from optimum.intel import OVModelForVision2Seq, OVWeightQuantizationConfig
-from transformers import TrOCRProcessor
+from paddleocr import PaddleOCR
 
 import datasets
 from datasets import load_dataset
 from taiwan_license_plate_recognition.Helper import accuracy_metric, get_num_of_workers
-from taiwan_license_plate_recognition.Utils import extract_license_number_trocr
+from taiwan_license_plate_recognition.Utils import extract_license_number_paddleocr
 
 load_dotenv()
 
 project_root: str = os.environ.get("PROJECT_ROOT", "")
 num_workers: int = get_num_of_workers()
-max_length: int = 64
 
-run = wandb.init(job_type="evaluate", project="taiwan-license-plate-recognition", group="TrOCR")
+run = wandb.init(job_type="evaluate", project="taiwan-license-plate-recognition", group="PaddleOCR")
 
 dataset = load_dataset(
-	"hermeschen1116/taiwan-license-plate-ocr", split="test", keep_in_memory=True, num_proc=num_workers
+	"hermeschen1116/taiwan-license-plate-ocr",
+	split="test",
+	keep_in_memory=True,
+	# , num_proc=num_workers
 )
 dataset = dataset.remove_columns(["label_other"])
 
 dataset = dataset.cast_column("image", datasets.Image(decode=True))
 
+
+def encode_image(image) -> numpy.ndarray:
+	cv2_image = cv2.cvtColor(numpy.asarray(image, dtype=numpy.uint8), cv2.COLOR_RGB2BGR)
+
+	return cv2_image
+
+
+dataset.set_transform(encode_image, columns=["image"], output_all_columns=True)
+dataset.set_format("numpy", columns=["image"], output_all_columns=True)
+
 dataset = dataset.map(
 	lambda samples: {"label": [sample.replace("-", "") for sample in samples]},
 	input_columns=["label"],
 	batched=True,
-	num_proc=num_workers,
+	# num_proc=num_workers,
 )
 
-processor = TrOCRProcessor.from_pretrained("microsoft/trocr-base-printed", clean_up_tokenization_spaces=True)
-
-quantization_config = OVWeightQuantizationConfig()
-ov_config = {"PERFORMANCE_HINT": "LATENCY", "CACHE_DIR": f"{project_root}/.ov_cache"}
-
-model = OVModelForVision2Seq.from_pretrained(
-	"hermeschen1116/taiwan-license-plate-recognition",
-	export=True,
-	ov_config=ov_config,
-	quantization_config=quantization_config,
-	device="cpu",
-)
+reader = PaddleOCR(lang="en", use_angle_cls=True, total_processes_num=num_workers, binarize=True, device="cpu")
 
 cer_metric = evaluate.load("cer", keep_in_memory=True)
 
+
 dataset = dataset.map(
-	lambda samples: {"prediction": extract_license_number_trocr(samples, model, processor)},
+	lambda sample: {"prediction": extract_license_number_paddleocr(sample, reader)},
 	input_columns=["image"],
+	# num_proc=num_workers,
 	batched=True,
 	batch_size=4,
 )
