@@ -9,7 +9,6 @@ import datasets
 import wandb
 from datasets import load_dataset
 from taiwan_license_plate_recognition.Helper import accuracy_metric, get_num_of_workers
-from taiwan_license_plate_recognition.PostProcess import remove_non_alphanum
 from taiwan_license_plate_recognition.Utils import extract_license_number_trocr
 
 load_dotenv()
@@ -56,7 +55,6 @@ dataset = dataset.map(
 	batch_size=4,
 )
 
-dataset.set_transform(remove_non_alphanum, columns=["predictions"], output_all_columns=True)
 
 cer_score = cer_metric.compute(predictions=dataset["prediction"], references=dataset["label"])
 accuracy_score = accuracy_metric(predictions=dataset["prediction"], references=dataset["label"])
