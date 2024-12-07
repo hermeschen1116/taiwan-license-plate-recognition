@@ -14,7 +14,7 @@ def crop_image(image: MatLike, bounded_box: torch.Tensor) -> MatLike:
 
 
 def remove_non_alphanum(s: str) -> str:
-	return s.strip(punctuation)
+	return s.translate(str.maketrans("", "", punctuation))
 
 
 def filter_license_number(candidates: List[str]) -> str:
@@ -23,10 +23,10 @@ def filter_license_number(candidates: List[str]) -> str:
 	filter_candidates: List[str] = []
 	for i, (c, cwh) in enumerate(zip(candidates, candidates_without_hyphen)):
 		if (
-			re.match("^[A-Z\d]{2}-[A-Z\d]{4}$", c) is None
-			and re.match("^[A-Z\d]{4}-[A-Z\d]{2}$", c) is None
-			and re.match("^[A-Z\d]{3}-[A-Z\d]{3}$", c) is None
-			and re.match("^[A-Z\d]{3}-[A-Z\d]{4}$", c) is None
+			re.match(r"^[A-Z\d]{2}-[A-Z\d]{4}$", c) is None
+			and re.match(r"^[A-Z\d]{4}-[A-Z\d]{2}$", c) is None
+			and re.match(r"^[A-Z\d]{3}-[A-Z\d]{3}$", c) is None
+			and re.match(r"^[A-Z\d]{3}-[A-Z\d]{4}$", c) is None
 		):
 			continue
 
