@@ -41,7 +41,16 @@ yolo_model = YOLO(yolo_model_path, task="obb")
 # )
 
 logging.info(f"{program_name}: Initialize PaddleOCR.")
-reader = PaddleOCR(lang="en", use_angle_cls=True, total_processes_num=num_workers, binarize=True, device="cpu")
+reader = PaddleOCR(
+	lang="en",
+	device="cpu",
+	use_angle_cls=True,
+	total_process_num=8,
+	use_mp=True,
+	max_text_length=8,
+	use_space_char=False,
+	binarize=True,
+)
 
 logging.info(f"{program_name}: Start detecting")
 for result in yolo_model.predict(stream_path, stream=True, stream_buffer=True, device="cpu"):
