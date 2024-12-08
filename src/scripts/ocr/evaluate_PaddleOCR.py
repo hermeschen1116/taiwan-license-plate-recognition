@@ -46,7 +46,16 @@ dataset = dataset.map(
 	# num_proc=num_workers,
 )
 
-reader = PaddleOCR(lang="en", use_angle_cls=True, total_processes_num=num_workers, binarize=True, device="cpu")
+reader = PaddleOCR(
+	lang="en",
+	device="cpu",
+	use_angle_cls=True,
+	total_process_num=8,
+	use_mp=True,
+	max_text_length=8,
+	use_space_char=False,
+	binarize=True,
+)
 
 cer_metric = evaluate.load("cer", keep_in_memory=True)
 
