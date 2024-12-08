@@ -32,4 +32,4 @@ def filter_license_number(candidates: List[str]) -> str:
 
 		filter_candidates.append(cwh.replace("-", ""))
 
-	return filter_candidates[0] if len(filter_candidates) >= 1 else ""
+	return filter_candidates[0] if len(set(filter_candidates)) >= 1 else ""
