@@ -3,12 +3,12 @@ from string import punctuation
 from typing import List
 
 import cv2
-import torch
+import numpy
 from cv2.typing import MatLike
 
 
-def crop_image(image: MatLike, bounded_box: torch.Tensor) -> MatLike:
-	x, y, w, h = cv2.boundingRect(bounded_box.numpy())
+def crop_image(image: MatLike, bounded_box: numpy.ndarray) -> MatLike:
+	x, y, w, h = cv2.boundingRect(bounded_box)
 
 	return image[y : y + h, x : x + w]
 

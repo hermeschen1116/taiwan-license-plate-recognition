@@ -11,7 +11,7 @@ def to_grayscale(image: MatLike) -> MatLike:
 def affine_transform(image: MatLike, new_size: int) -> Tuple[MatLike, numpy.ndarray]:
 	image_shape: numpy.ndarray = numpy.array(image.shape[:2])
 
-	scale_ratio: numpy.floating = numpy.min(new_size / image_shape)
+	scale_ratio: numpy.float32 = numpy.min(new_size / image_shape).astype(numpy.float32)
 	translation_array: numpy.ndarray = (image_shape * scale_ratio - new_size) * -0.5
 
 	affine_array: numpy.ndarray = numpy.array(
@@ -28,11 +28,7 @@ def affine_transform(image: MatLike, new_size: int) -> Tuple[MatLike, numpy.ndar
 	), cv2.invertAffineTransform(affine_array)
 
 
-def to_RGB(image: MatLike) -> MatLike:
-	return image.transpose(2, 0, 1)[..., numpy.newaxis]
-
-
 def add_letterbox(image: MatLike, new_size: int) -> Tuple[MatLike, numpy.ndarray]:
 	transformed_image, reverse_affine_array = affine_transform(image, new_size)
 
-	return to_RGB(transformed_image), reverse_affine_array
+	return cv2.cvtColor(transformed_image, cv2.COLOR_BGR2RGB), reverse_affine_array
