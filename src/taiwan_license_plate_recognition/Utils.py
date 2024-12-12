@@ -4,7 +4,7 @@ from typing import List
 from PIL import Image
 from cv2.typing import MatLike
 
-from taiwan_license_plate_recognition.PostProcess import crop_image, filter_license_number, remove_non_alphanum
+from taiwan_license_plate_recognition.PostProcess import crop_image, remove_non_alphanum, validate_license_number
 from taiwan_license_plate_recognition.Preprocess import add_letterbox
 
 
@@ -25,7 +25,7 @@ def extract_license_number_paddleocr(images: List[MatLike], model=None) -> List[
 
 	results = [result[0][1][0] for result in filter(None, itertools.chain.from_iterable(predictions))]
 
-	return [filter_license_number([result]) for result in results]
+	return list(filter(None, [validate_license_number(result) for result in results]))
 
 
 def extract_license_number_trocr(
