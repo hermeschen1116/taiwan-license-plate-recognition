@@ -1,27 +1,26 @@
 from typing import List
 
-import cv2
 import numpy
 from PIL import Image
+from cv2.typing import MatLike
 
 from taiwan_license_plate_recognition.PostProcess import crop_image, filter_license_number, remove_non_alphanum
-from taiwan_license_plate_recognition.Preprocess import affine_transform
+from taiwan_license_plate_recognition.Preprocess import add_letterbox
 
 
-def extract_license_plate(result, size: int = 640) -> List[Image.Image]:
-	license_plates: List[Image.Image] = []
+def extract_license_plate(result, size: int = 640) -> List[MatLike]:
+	license_plates: List[MatLike] = []
 
 	for obb in result.obb.xyxyxyxy:
-		cropped_image = crop_image(result.orig_img, obb)
-		cropped_image, _ = affine_transform(cropped_image, size)
-		cropped_image = Image.fromarray(cv2.cvtColor(cropped_image, cv2.COLOR_BGR2RGB))
+		cropped_image = crop_image(result.orig_img, obb.numpy())
+		cropped_image, _ = add_letterbox(cropped_image, size)
 		license_plates.append(cropped_image)
 
 	return license_plates
 
 
-def extract_license_number_paddleocr(images: List[Image.Image], model=None) -> List[str]:
-	image_arrays = [cv2.cvtColor(numpy.asarray(image, dtype=numpy.uint8), cv2.COLOR_RGB2BGR) for image in images]
+def extract_license_number_paddleocr(images: List[MatLike], model=None) -> List[str]:
+	image_arrays = [numpy.asarray(image, dtype=numpy.uint8) for image in images]
 
 	results = [model.ocr(image)[0] for image in image_arrays]
 
