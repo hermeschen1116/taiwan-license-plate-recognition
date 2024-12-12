@@ -1,12 +1,12 @@
 import os
 
 import evaluate
+import wandb
 from dotenv import load_dotenv
 from optimum.intel import OVModelForVision2Seq, OVWeightQuantizationConfig
 from transformers import TrOCRProcessor
 
 import datasets
-import wandb
 from datasets import load_dataset
 from taiwan_license_plate_recognition.Helper import accuracy_metric, get_num_of_workers
 from taiwan_license_plate_recognition.Utils import extract_license_number_trocr
