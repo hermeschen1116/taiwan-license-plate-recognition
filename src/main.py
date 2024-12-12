@@ -2,6 +2,7 @@ import os
 from typing import List
 
 import paddle
+import requests
 from dotenv import load_dotenv
 from paddleocr import PaddleOCR
 from ultralytics import YOLO
@@ -40,6 +41,6 @@ for result in yolo_model.predict(stream_path, stream=True, device="cpu"):
 	license_numbers: List[str] = extract_license_number_paddleocr(cropped_images, reader)
 	if len(license_numbers) == 0:
 		continue
-	print(f"{program_name}: License number: {', '.join(license_numbers)}")
-	# requests.post(api, data={"名稱": "車牌辨識", "車牌號碼": license_numbers[0]})
-	# subprocess.run(["curl", "-d", f"名稱=車牌辨識&車牌號碼={license_numbers[0]}", api])
+	for license_number in license_numbers:
+		print(f"{program_name}: License number: {license_number}")
+		requests.post(api, data={"車牌號碼": license_number, "名稱": "車牌辨識"})
