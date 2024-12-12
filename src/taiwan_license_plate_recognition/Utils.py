@@ -1,6 +1,6 @@
+import itertools
 from typing import List
 
-import numpy
 from PIL import Image
 from cv2.typing import MatLike
 
@@ -8,26 +8,24 @@ from taiwan_license_plate_recognition.PostProcess import crop_image, filter_lice
 from taiwan_license_plate_recognition.Preprocess import add_letterbox
 
 
-def extract_license_plate(result, size: int = 640) -> List[MatLike]:
+def extract_license_plate(results, size: int = 640) -> List[MatLike]:
 	license_plates: List[MatLike] = []
 
-	for obb in result.obb.xyxyxyxy:
-		cropped_image = crop_image(result.orig_img, obb.numpy())
-		cropped_image, _ = add_letterbox(cropped_image, size)
-		license_plates.append(cropped_image)
+	for result in results:
+		for obb in result.obb.xyxyxyxy:
+			cropped_image = crop_image(result.orig_img, obb.numpy())
+			cropped_image, _ = add_letterbox(cropped_image, size)
+			license_plates.append(cropped_image)
 
 	return license_plates
 
 
 def extract_license_number_paddleocr(images: List[MatLike], model=None) -> List[str]:
-	image_arrays = [numpy.asarray(image, dtype=numpy.uint8) for image in images]
+	predictions = [model.ocr(image) for image in images]
 
-	results = [model.ocr(image)[0] for image in image_arrays]
+	results = [result[0][1][0] for result in filter(None, itertools.chain.from_iterable(predictions))]
 
-	return [
-		filter_license_number([(result[i][1][0]) for i in range(len(result))]) if result is not None else ""
-		for result in results
-	]
+	return [filter_license_number(result) for result in results]
 
 
 def extract_license_number_trocr(
