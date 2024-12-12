@@ -3,11 +3,11 @@ import os
 import cv2
 import evaluate
 import numpy
-import wandb
 from dotenv import load_dotenv
 from paddleocr import PaddleOCR
 
 import datasets
+import wandb
 from datasets import load_dataset
 from taiwan_license_plate_recognition.Helper import accuracy_metric, get_num_of_workers
 from taiwan_license_plate_recognition.Utils import extract_license_number_paddleocr
