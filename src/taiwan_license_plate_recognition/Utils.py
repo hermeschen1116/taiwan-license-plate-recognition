@@ -25,7 +25,7 @@ def extract_license_number_paddleocr(images: List[MatLike], model=None) -> List[
 
 	results = [result[0][1][0] for result in filter(None, itertools.chain.from_iterable(predictions))]
 
-	return [filter_license_number(result) for result in results]
+	return [filter_license_number([result]) for result in results]
 
 
 def extract_license_number_trocr(
