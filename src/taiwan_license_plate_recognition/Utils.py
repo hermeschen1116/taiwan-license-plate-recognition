@@ -21,7 +21,11 @@ def extract_license_plate(results, size: int = 640) -> List[MatLike]:
 
 
 def extract_license_number_paddleocr(images: List[MatLike], model=None) -> List[str]:
-	predictions = [model.ocr(image) for image in images]
+	try:
+		predictions = [model.ocr(image) for image in images]
+	except IndexError:
+		# deal with Paddle OCR internal error
+		return []
 
 	results = [result[0][1][0] for result in filter(None, itertools.chain.from_iterable(predictions))]
 
