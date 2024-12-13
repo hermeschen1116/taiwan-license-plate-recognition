@@ -21,6 +21,9 @@ def extract_license_plate(results, size: int = 640) -> List[MatLike]:
 
 
 def extract_license_number_paddleocr(images: List[MatLike], model=None) -> List[str]:
+	if len(images) == 0:
+		return []
+
 	try:
 		predictions = [model.ocr(image) for image in images]
 	except IndexError:
