@@ -69,8 +69,7 @@
 
 - After training, I can easily use export API to save model as OpenVINO IR format for further use.
 
-- Result
-  ![yolo result](https://wandb.ai/hermeschen1116/taiwan-license-plate-recognition/reports/YOLO--VmlldzoxMDU4NDk0MA)
+- [Result](https://wandb.ai/hermeschen1116/taiwan-license-plate-recognition/reports/YOLO--VmlldzoxMDU4NDk0MA)
 
 ### Recognition
 
