@@ -37,7 +37,6 @@ dataset = dataset.map(
 	lambda samples: {"image": [sample.resize((384, 384), resample=Resampling.BILINEAR) for sample in samples]},
 	input_columns=["image"],
 	batched=True,
-	num_proc=num_workers,
 )
 
 

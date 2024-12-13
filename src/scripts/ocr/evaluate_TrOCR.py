@@ -27,10 +27,7 @@ dataset = dataset.remove_columns(["label_other"])
 dataset = dataset.cast_column("image", datasets.Image(decode=True))
 
 dataset = dataset.map(
-	lambda samples: {"label": [sample.replace("-", "") for sample in samples]},
-	input_columns=["label"],
-	batched=True,
-	num_proc=num_workers,
+	lambda samples: {"label": [sample.replace("-", "") for sample in samples]}, input_columns=["label"], batched=True
 )
 
 processor = TrOCRProcessor.from_pretrained("microsoft/trocr-base-printed", clean_up_tokenization_spaces=True)
