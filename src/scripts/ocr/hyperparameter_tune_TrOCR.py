@@ -32,7 +32,6 @@ dataset = dataset.map(
 	lambda samples: {"image": [sample.resize((384, 384), resample=Resampling.BILINEAR) for sample in samples]},
 	input_columns=["image"],
 	batched=True,
-	num_proc=num_workers,
 )
 
 
@@ -52,10 +51,7 @@ def encode_label(label):
 
 
 dataset = dataset.map(
-	lambda samples: {"label": [encode_label(sample) for sample in samples]},
-	input_columns=["label"],
-	batched=True,
-	num_proc=num_workers,
+	lambda samples: {"label": [encode_label(sample) for sample in samples]}, input_columns=["label"], batched=True
 ).rename_column("label", "labels")
 dataset.set_format("torch", columns=["pixel_values", "labels"], output_all_columns=True)
 
