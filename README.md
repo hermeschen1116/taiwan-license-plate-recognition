@@ -48,7 +48,7 @@
 
 - YOLO series models provide high accuracy and fast object detection, so I choose YOLO for detection task.
 
-- To achive fast and lightweight inference on CPU, I choose a bit old and small model, YOLOv8n.
+- To achive fast and lightweight inference on CPU, I choose a bit older and smaller model, YOLOv8n.
 
   > **Why not choose newer model?**
   >
@@ -73,6 +73,21 @@
 
 ### Recognition
 
+- First, I try TROCR, a transformer based model for OCR task.
+  But it hard to fine tune it on my own dataset.
+
+- So I compare some common OCR methods, EasyOCR, Tesseract, and PaddleOCR.
+  And I found PaddleOCR performs the best on my data (a bit obscure).
+
+- And because in Taiwan, we usually can find some stickers and some marks on license plate may contain not related text on them.
+  I also implement a `validate_license_number` function to filter out the text in correct format (common 2-4, 4-2, 3-3, and 3-4 format).
+
+#### Training
+
+WIP
+
 ## Optimization
 
 - Exporting model to Openvino IR format for fast and efficient inference on CPU so that it can run on weak device.
+
+## Deploy
