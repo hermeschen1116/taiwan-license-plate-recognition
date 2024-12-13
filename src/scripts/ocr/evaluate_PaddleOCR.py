@@ -50,9 +50,9 @@ reader = PaddleOCR(
 	lang="en",
 	device="cpu",
 	use_angle_cls=True,
-	total_process_num=8,
-	use_mp=True,
 	max_text_length=8,
+	total_process_num=num_workers,
+	use_mp=True,
 	use_space_char=False,
 	binarize=True,
 )

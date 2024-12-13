@@ -24,9 +24,19 @@ api: str = os.environ.get("API", "")
 
 yolo_model = YOLO(yolo_model_path, task="obb")
 
-reader = PaddleOCR(lang="en", device="cpu", use_angle_cls=True, max_text_length=8, use_space_char=False, binarize=True)
+reader = PaddleOCR(
+	lang="en",
+	device="cpu",
+	use_angle_cls=True,
+	max_text_length=8,
+	total_process_num=num_workers,
+	use_mp=True,
+	use_space_char=False,
+	binarize=True,
+)
 
 stream = cv2.VideoCapture(stream_path)
+stream.set(cv2.CAP_PROP_FOURCC, cv2.VideoWriter.fourcc("M", "J", "P", "G"))
 stream.set(cv2.CAP_PROP_FRAME_WIDTH, image_size)
 stream.set(cv2.CAP_PROP_FRAME_HEIGHT, image_size)
 stream.set(cv2.CAP_PROP_FPS, 1)
@@ -36,10 +46,8 @@ while stream.isOpened():
 	if not response:
 		continue
 
-	result = yolo_model.predict(frame, imgsz=image_size, device="cpu")
-	cropped_images = extract_license_plate(result, image_size)
-	if len(cropped_images) == 0:
-		continue
+	detections = yolo_model.predict(frame, imgsz=image_size, half=True, device="cpu")
+	cropped_images = extract_license_plate(detections, image_size)
 	license_numbers: List[str] = extract_license_number_paddleocr(cropped_images, reader)
 	if len(license_numbers) == 0:
 		continue
