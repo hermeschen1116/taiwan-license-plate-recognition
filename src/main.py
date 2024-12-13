@@ -1,6 +1,7 @@
 import os
 from typing import List
 
+import cv2
 import paddle
 import requests
 from dotenv import load_dotenv
@@ -23,18 +24,19 @@ api: str = os.environ.get("API", "")
 
 yolo_model = YOLO(yolo_model_path, task="obb")
 
-reader = PaddleOCR(
-	lang="en",
-	device="cpu",
-	use_angle_cls=True,
-	total_process_num=num_workers,
-	use_mp=True,
-	max_text_length=8,
-	use_space_char=False,
-	binarize=True,
-)
+reader = PaddleOCR(lang="en", device="cpu", use_angle_cls=True, max_text_length=8, use_space_char=False, binarize=True)
 
-for result in yolo_model.predict(stream_path, stream=True, imgsz=image_size, device="cpu"):
+stream = cv2.VideoCapture(stream_path)
+stream.set(cv2.CAP_PROP_FRAME_WIDTH, image_size)
+stream.set(cv2.CAP_PROP_FRAME_HEIGHT, image_size)
+stream.set(cv2.CAP_PROP_FPS, 30)
+
+while stream.isOpened():
+	response, frame = stream.read()
+	if not response:
+		continue
+
+	result = yolo_model.predict(frame, imgsz=image_size, device="cpu")
 	cropped_images = extract_license_plate(result, image_size)
 	license_numbers: List[str] = extract_license_number_paddleocr(cropped_images, reader)
 	if len(license_numbers) == 0:
