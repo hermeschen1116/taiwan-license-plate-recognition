@@ -34,9 +34,7 @@ reader = PaddleOCR(
 	binarize=True,
 )
 
-for result in yolo_model.predict(stream_path, stream=True, device="cpu"):
-	if result.probs is None:
-		continue
+for result in yolo_model.predict(stream_path, stream=True, imgsz=image_size, device="cpu"):
 	cropped_images = extract_license_plate(result, image_size)
 	license_numbers: List[str] = extract_license_number_paddleocr(cropped_images, reader)
 	if len(license_numbers) == 0:
