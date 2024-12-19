@@ -9,7 +9,7 @@ from dotenv import load_dotenv
 from paddleocr import PaddleOCR
 from ultralytics import YOLO
 
-from taiwan_license_plate_recognition.Helper import get_num_of_workers
+from taiwan_license_plate_recognition.Utils import get_num_of_workers
 from taiwan_license_plate_recognition.detection import extract_license_plate
 from taiwan_license_plate_recognition.recognition import extract_license_number
 

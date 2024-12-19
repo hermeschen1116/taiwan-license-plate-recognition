@@ -1,14 +1,14 @@
 import os
 from pprint import pprint
 
-import wandb
 import yaml
 from dotenv import load_dotenv
 from roboflow import Roboflow
 from ultralytics import YOLO
-from wandb.integration.ultralytics import add_wandb_callback
 
-from taiwan_license_plate_recognition.Helper import get_num_of_workers, get_torch_device
+import wandb
+from taiwan_license_plate_recognition.Utils import get_num_of_workers, get_torch_device
+from wandb.integration.ultralytics import add_wandb_callback
 
 load_dotenv()
 
