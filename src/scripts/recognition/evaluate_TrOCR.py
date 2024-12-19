@@ -1,7 +1,9 @@
 import os
+from typing import List
 
 import evaluate
 import wandb
+from PIL.Image import Image
 from dotenv import load_dotenv
 from optimum.intel import OVModelForVision2Seq, OVWeightQuantizationConfig
 from transformers import TrOCRProcessor
@@ -9,14 +11,14 @@ from transformers import TrOCRProcessor
 import datasets
 from datasets import load_dataset
 from taiwan_license_plate_recognition.Helper import get_num_of_workers
-from taiwan_license_plate_recognition.recognition import extract_license_number_trocr
 from taiwan_license_plate_recognition.recognition.Metrics import accuracy
+from taiwan_license_plate_recognition.recognition.PostProcess import validate_license_number
 
 load_dotenv()
 
 project_root: str = os.environ.get("PROJECT_ROOT", "")
 num_workers: int = get_num_of_workers()
-max_length: int = 64
+max_length: int = 8
 
 run = wandb.init(job_type="evaluate", project="taiwan-license-plate-recognition", group="TrOCR")
 
@@ -46,11 +48,22 @@ model = OVModelForVision2Seq.from_pretrained(
 
 cer_metric = evaluate.load("cer", keep_in_memory=True)
 
+
+def extract_license_number(images: List[Image]) -> List[str]:
+	if len(images) == 0:
+		return []
+
+	encode_image = processor(images, return_tensors="pt").pixel_values
+
+	generated_ids = model.generate(encode_image, max_length=max_length)
+
+	results = processor.batch_decode(generated_ids, skip_special_tokens=True)
+
+	return [str(validate_license_number(result)) for result in results]
+
+
 dataset = dataset.map(
-	lambda samples: {"prediction": [str(result) for result in extract_license_number_trocr(samples, model, processor)]},
-	input_columns=["image"],
-	batched=True,
-	batch_size=4,
+	lambda samples: {"prediction": extract_license_number(samples)}, input_columns=["image"], batched=True, batch_size=4
 )
 
 

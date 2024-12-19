@@ -11,7 +11,7 @@ from ultralytics import YOLO
 
 from taiwan_license_plate_recognition.Helper import get_num_of_workers
 from taiwan_license_plate_recognition.detection import extract_license_plate
-from taiwan_license_plate_recognition.recognition import extract_license_number_paddleocr
+from taiwan_license_plate_recognition.recognition import extract_license_number
 
 load_dotenv()
 paddle.disable_signal_handler()
@@ -58,7 +58,7 @@ while stream.isOpened():
 
 	detections = yolo_model.predict(frame, imgsz=image_size, half=True, device="cpu")
 	cropped_images = extract_license_plate(detections, image_size)
-	license_numbers: List[str] = list(filter(None, extract_license_number_paddleocr(cropped_images, reader)))
+	license_numbers: List[str] = list(filter(None, extract_license_number(cropped_images, reader)))
 	if len(license_numbers) == 0:
 		continue
 	for license_number in license_numbers:

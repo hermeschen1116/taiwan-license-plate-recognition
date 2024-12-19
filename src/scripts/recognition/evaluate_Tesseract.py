@@ -1,16 +1,18 @@
 import os
+from typing import List
 
 import cv2
 import evaluate
 import numpy
 import wandb
+from PIL.Image import Image
 from dotenv import load_dotenv
-from paddleocr import PaddleOCR
+from pytesseract import pytesseract
 
 import datasets
 from datasets import load_dataset
+from src.taiwan_license_plate_recognition.recognition.PostProcess import validate_license_number
 from taiwan_license_plate_recognition.Helper import get_num_of_workers
-from taiwan_license_plate_recognition.recognition import extract_license_number
 from taiwan_license_plate_recognition.recognition.Metrics import accuracy
 
 load_dotenv()
@@ -41,25 +43,21 @@ dataset = dataset.map(
 	lambda samples: {"label": [sample.replace("-", "") for sample in samples]}, input_columns=["label"], batched=True
 )
 
-reader = PaddleOCR(
-	lang="en",
-	device="cpu",
-	use_angle_cls=True,
-	max_text_length=8,
-	total_process_num=num_workers,
-	use_mp=True,
-	use_space_char=False,
-	binarize=True,
-)
 
 cer_metric = evaluate.load("cer", keep_in_memory=True)
 
+tesseract_config: str = "--psm 6 --oem 1"
+
+
+def extract_license_number(images: List[Image]) -> List[str]:
+	return [
+		str(validate_license_number(pytesseract.image_to_string(image, lang="eng", config=tesseract_config)))
+		for image in images
+	]
+
 
 dataset = dataset.map(
-	lambda samples: {"prediction": [str(result) for result in extract_license_number(samples, reader)]},
-	input_columns=["image"],
-	batched=True,
-	batch_size=4,
+	lambda samples: {"prediction": extract_license_number(samples)}, input_columns=["image"], batched=True, batch_size=4
 )
 
 cer_score = cer_metric.compute(predictions=dataset["prediction"], references=dataset["label"])
