@@ -1,5 +1,5 @@
 import os
-from typing import List
+from typing import List, Optional
 
 import cv2
 import evaluate
@@ -39,10 +39,6 @@ def encode_image(image) -> numpy.ndarray:
 dataset.set_transform(encode_image, columns=["image"], output_all_columns=True)
 dataset.set_format("numpy", columns=["image"], output_all_columns=True)
 
-dataset = dataset.map(
-	lambda samples: {"label": [sample.replace("-", "") for sample in samples]}, input_columns=["label"], batched=True
-)
-
 
 cer_metric = evaluate.load("cer", keep_in_memory=True)
 
@@ -50,10 +46,12 @@ tesseract_config: str = "--psm 6 --oem 1"
 
 
 def extract_license_number(images: List[Image]) -> List[str]:
-	return [
-		str(validate_license_number(pytesseract.image_to_string(image, lang="eng", config=tesseract_config).strip()))
+	results: List[Optional[str]] = [
+		validate_license_number(pytesseract.image_to_string(image, lang="eng", config=tesseract_config).strip())
 		for image in images
 	]
+
+	return [result if result is not None else "" for result in results]
 
 
 dataset = dataset.map(

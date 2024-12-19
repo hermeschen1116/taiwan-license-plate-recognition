@@ -2,13 +2,13 @@ import os
 from typing import List
 
 import evaluate
-import wandb
 from PIL.Image import Image
 from dotenv import load_dotenv
 from optimum.intel import OVModelForVision2Seq, OVWeightQuantizationConfig
 from transformers import TrOCRProcessor
 
 import datasets
+import wandb
 from datasets import load_dataset
 from taiwan_license_plate_recognition.Helper import get_num_of_workers
 from taiwan_license_plate_recognition.recognition.Metrics import accuracy
@@ -29,14 +29,10 @@ dataset = dataset.remove_columns(["label_other"])
 
 dataset = dataset.cast_column("image", datasets.Image(decode=True))
 
-dataset = dataset.map(
-	lambda samples: {"label": [sample.replace("-", "") for sample in samples]}, input_columns=["label"], batched=True
-)
-
 processor = TrOCRProcessor.from_pretrained("microsoft/trocr-base-printed", clean_up_tokenization_spaces=True)
 
 quantization_config = OVWeightQuantizationConfig()
-ov_config = {"PERFORMANCE_HINT": "LATENCY", "CACHE_DIR": f"{project_root}/.ov_cache"}
+ov_config = {"PERFORMANCE_HINT": "LATENCY"}
 
 model = OVModelForVision2Seq.from_pretrained(
 	"hermeschen1116/taiwan-license-plate-recognition",
@@ -59,7 +55,9 @@ def extract_license_number(images: List[Image]) -> List[str]:
 
 	results = processor.batch_decode(generated_ids, skip_special_tokens=True)
 
-	return [str(validate_license_number(result)) for result in results]
+	results = [validate_license_number(result) for result in results]
+
+	return [result if result is not None else "" for result in results]
 
 
 dataset = dataset.map(
