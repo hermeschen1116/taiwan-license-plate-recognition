@@ -11,9 +11,9 @@ from easyocr import easyocr
 
 import datasets
 from datasets import load_dataset
-from src.taiwan_license_plate_recognition.recognition.PostProcess import validate_license_number
 from taiwan_license_plate_recognition.Helper import get_num_of_workers
 from taiwan_license_plate_recognition.recognition.Metrics import accuracy
+from taiwan_license_plate_recognition.recognition.PostProcess import validate_license_number
 
 load_dotenv()
 
