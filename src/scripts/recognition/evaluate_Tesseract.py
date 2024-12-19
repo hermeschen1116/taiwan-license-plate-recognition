@@ -4,12 +4,12 @@ from typing import List
 import cv2
 import evaluate
 import numpy
-import wandb
 from PIL.Image import Image
 from dotenv import load_dotenv
 from pytesseract import pytesseract
 
 import datasets
+import wandb
 from datasets import load_dataset
 from taiwan_license_plate_recognition.Helper import get_num_of_workers
 from taiwan_license_plate_recognition.recognition.Metrics import accuracy
@@ -20,7 +20,7 @@ load_dotenv()
 project_root: str = os.environ.get("PROJECT_ROOT", "")
 num_workers: int = get_num_of_workers()
 
-run = wandb.init(job_type="evaluate", project="taiwan-license-plate-recognition", group="PaddleOCR")
+run = wandb.init(job_type="evaluate", project="taiwan-license-plate-recognition", group="Tesseract")
 
 dataset = load_dataset(
 	"hermeschen1116/taiwan-license-plate-ocr", split="test", keep_in_memory=True, num_proc=num_workers
@@ -51,7 +51,7 @@ tesseract_config: str = "--psm 6 --oem 1"
 
 def extract_license_number(images: List[Image]) -> List[str]:
 	return [
-		str(validate_license_number(pytesseract.image_to_string(image, lang="eng", config=tesseract_config)))
+		str(validate_license_number(pytesseract.image_to_string(image, lang="eng", config=tesseract_config).strip()))
 		for image in images
 	]
 
