@@ -42,6 +42,10 @@ stream.set(cv2.CAP_PROP_FRAME_HEIGHT, image_size)
 stream.set(cv2.CAP_PROP_FPS, 1)
 
 while stream.isOpened():
+	key = cv2.waitKey(90)
+	if key == ord('q') or key == 27:
+		break
+
 	response, frame = stream.read()
 	if not response:
 		continue
