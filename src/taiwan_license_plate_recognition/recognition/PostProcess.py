@@ -16,4 +16,4 @@ def validate_license_number(candidate: str) -> Optional[str]:
 	):
 		return None
 
-	return candidate.replace("-", "")
+	return candidate
