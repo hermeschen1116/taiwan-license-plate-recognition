@@ -1,4 +1,5 @@
 import os
+import time
 from typing import List
 
 import cv2
@@ -9,7 +10,8 @@ from paddleocr import PaddleOCR
 from ultralytics import YOLO
 
 from taiwan_license_plate_recognition.Helper import get_num_of_workers
-from taiwan_license_plate_recognition.Utils import extract_license_number_paddleocr, extract_license_plate
+from taiwan_license_plate_recognition.detection import extract_license_plate
+from taiwan_license_plate_recognition.recognition import extract_license_number_paddleocr
 
 load_dotenv()
 paddle.disable_signal_handler()
@@ -17,6 +19,7 @@ paddle.disable_signal_handler()
 num_workers: int = get_num_of_workers()
 
 program_name: str = "LICENSE NUMBER RECOGNIZER"
+project_root: str = os.environ.get("PROJECT_ROOT", "")
 image_size: int = int(os.environ.get("IMAGE_SIZE", 640))
 yolo_model_path: str = os.environ.get("YOLO_MODEL_PATH", "")
 stream_path: str = os.environ.get("CAMERA_ADDRESS", "")
@@ -43,16 +46,18 @@ stream.set(cv2.CAP_PROP_FPS, 1)
 
 while stream.isOpened():
 	key = cv2.waitKey(90)
-	if key == ord('q') or key == 27:
+	if key == ord("q") or key == 27:
+		stream.release()
 		break
 
 	response, frame = stream.read()
 	if not response:
 		continue
+	cv2.imwrite(f"{project_root}/log/{time.time()}.png", frame)
 
 	detections = yolo_model.predict(frame, imgsz=image_size, half=True, device="cpu")
 	cropped_images = extract_license_plate(detections, image_size)
-	license_numbers: List[str] = extract_license_number_paddleocr(cropped_images, reader)
+	license_numbers: List[str] = list(filter(None, extract_license_number_paddleocr(cropped_images, reader)))
 	if len(license_numbers) == 0:
 		continue
 	for license_number in license_numbers:

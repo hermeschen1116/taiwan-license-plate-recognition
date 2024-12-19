@@ -1,15 +1,16 @@
 import os
 
 import evaluate
+import wandb
 from dotenv import load_dotenv
 from optimum.intel import OVModelForVision2Seq, OVWeightQuantizationConfig
 from transformers import TrOCRProcessor
 
 import datasets
-import wandb
 from datasets import load_dataset
-from taiwan_license_plate_recognition.Helper import accuracy_metric, get_num_of_workers
-from taiwan_license_plate_recognition.Utils import extract_license_number_trocr
+from taiwan_license_plate_recognition.Helper import get_num_of_workers
+from taiwan_license_plate_recognition.recognition import extract_license_number_trocr
+from taiwan_license_plate_recognition.recognition.Metrics import accuracy
 
 load_dotenv()
 
@@ -46,7 +47,7 @@ model = OVModelForVision2Seq.from_pretrained(
 cer_metric = evaluate.load("cer", keep_in_memory=True)
 
 dataset = dataset.map(
-	lambda samples: {"prediction": extract_license_number_trocr(samples, model, processor)},
+	lambda samples: {"prediction": [str(result) for result in extract_license_number_trocr(samples, model, processor)]},
 	input_columns=["image"],
 	batched=True,
 	batch_size=4,
@@ -54,7 +55,7 @@ dataset = dataset.map(
 
 
 cer_score = cer_metric.compute(predictions=dataset["prediction"], references=dataset["label"])
-accuracy_score = accuracy_metric(predictions=dataset["prediction"], references=dataset["label"])
+accuracy_score = accuracy(predictions=dataset["prediction"], references=dataset["label"])
 
 run.log({"test/cer": cer_score, "test/accuracy": accuracy_score})
 

@@ -1,18 +1,17 @@
 import os
-from typing import List
 
 import cv2
 import evaluate
 import numpy
-from cv2.typing import MatLike
+import wandb
 from dotenv import load_dotenv
 from paddleocr import PaddleOCR
 
 import datasets
-import wandb
 from datasets import load_dataset
-from taiwan_license_plate_recognition.Helper import accuracy_metric, get_num_of_workers
-from taiwan_license_plate_recognition.PostProcess import validate_license_number
+from taiwan_license_plate_recognition.Helper import get_num_of_workers
+from taiwan_license_plate_recognition.recognition import extract_license_number_paddleocr
+from taiwan_license_plate_recognition.recognition.Metrics import accuracy
 
 load_dotenv()
 
@@ -56,26 +55,15 @@ reader = PaddleOCR(
 cer_metric = evaluate.load("cer", keep_in_memory=True)
 
 
-def extract_license_number(images: List[MatLike]) -> List[str]:
-	try:
-		predictions = [reader.ocr(image)[0] for image in images]
-	except IndexError:
-		# deal with Paddle OCR internal error
-		return ["" for _ in images]
-
-	predictions = [prediction if prediction is not None else [] for prediction in predictions]
-
-	results = [list(filter(None, [validate_license_number(p[1][0]) for p in prediction])) for prediction in predictions]
-
-	return [result[0] if len(result) != 0 else "" for result in results]
-
-
 dataset = dataset.map(
-	lambda samples: {"prediction": extract_license_number(samples)}, input_columns=["image"], batched=True, batch_size=4
+	lambda samples: {"prediction": [str(result) for result in extract_license_number_paddleocr(samples, reader)]},
+	input_columns=["image"],
+	batched=True,
+	batch_size=4,
 )
 
 cer_score = cer_metric.compute(predictions=dataset["prediction"], references=dataset["label"])
-accuracy_score = accuracy_metric(predictions=dataset["prediction"], references=dataset["label"])
+accuracy_score = accuracy(predictions=dataset["prediction"], references=dataset["label"])
 
 run.log({"test/cer": cer_score, "test/accuracy": accuracy_score})
 
