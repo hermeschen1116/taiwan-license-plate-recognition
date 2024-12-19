@@ -3,11 +3,11 @@ import os
 import cv2
 import evaluate
 import numpy
-import wandb
 from dotenv import load_dotenv
 from paddleocr import PaddleOCR
 
 import datasets
+import wandb
 from datasets import load_dataset
 from taiwan_license_plate_recognition.Helper import get_num_of_workers
 from taiwan_license_plate_recognition.recognition import extract_license_number
@@ -37,10 +37,6 @@ def encode_image(image) -> numpy.ndarray:
 dataset.set_transform(encode_image, columns=["image"], output_all_columns=True)
 dataset.set_format("numpy", columns=["image"], output_all_columns=True)
 
-dataset = dataset.map(
-	lambda samples: {"label": [sample.replace("-", "") for sample in samples]}, input_columns=["label"], batched=True
-)
-
 reader = PaddleOCR(
 	lang="en",
 	device="cpu",
@@ -56,7 +52,9 @@ cer_metric = evaluate.load("cer", keep_in_memory=True)
 
 
 dataset = dataset.map(
-	lambda samples: {"prediction": [str(result) for result in extract_license_number(samples, reader)]},
+	lambda samples: {
+		"prediction": [result if result is not None else "" for result in extract_license_number(samples, reader)]
+	},
 	input_columns=["image"],
 	batched=True,
 	batch_size=4,
