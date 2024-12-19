@@ -16,16 +16,17 @@ from taiwan_license_plate_recognition.recognition import extract_license_number_
 load_dotenv()
 paddle.disable_signal_handler()
 
-num_workers: int = get_num_of_workers()
-
-program_name: str = "LICENSE NUMBER RECOGNIZER"
 project_root: str = os.environ.get("PROJECT_ROOT", "")
-image_size: int = int(os.environ.get("IMAGE_SIZE", 640))
-yolo_model_path: str = os.environ.get("YOLO_MODEL_PATH", "")
-stream_path: str = os.environ.get("CAMERA_ADDRESS", "")
-api: str = os.environ.get("API", "")
 
-yolo_model = YOLO(yolo_model_path, task="obb")
+num_workers: int = get_num_of_workers()
+program_name: str = "LICENSE NUMBER RECOGNIZER"
+
+image_size: int = int(os.environ.get("IMAGE_SIZE", 640))
+stream_path: str = os.environ.get("STREAM_SOURCE", "")
+detection_model_path: str = os.environ.get("DETECTION_MODEL_PATH", "")
+api_endpoint: str = os.environ.get("API_ENDPOINT", "")
+
+yolo_model = YOLO(detection_model_path, task="obb")
 
 reader = PaddleOCR(
 	lang="en",
@@ -62,4 +63,4 @@ while stream.isOpened():
 		continue
 	for license_number in license_numbers:
 		print(f"{program_name}: License number: {license_number}")
-		requests.post(api, data={"車牌號碼": license_number, "名稱": "車牌辨識"})
+		requests.post(api_endpoint, data={"車牌號碼": license_number, "名稱": "車牌辨識"})
