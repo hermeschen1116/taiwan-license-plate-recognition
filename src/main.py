@@ -1,67 +1,61 @@
 import os
-import time
-from typing import Generator, List
+from typing import List, Optional
 
 import cv2
-import paddle
-import requests
 from cv2.typing import MatLike
 from dotenv import load_dotenv
 from paddleocr import PaddleOCR
 from ultralytics import YOLO
 
-from taiwan_license_plate_recognition.Utils import get_num_of_workers
-from taiwan_license_plate_recognition.detection import extract_license_plate
-from taiwan_license_plate_recognition.recognition import extract_license_number
-
-load_dotenv()
-paddle.disable_signal_handler()
-
-project_root: str = os.environ.get("PROJECT_ROOT", "")
-program_name: str = "LICENSE NUMBER RECOGNIZER"
-
-inference_device: str = os.environ.get("INFERENCE_DEVICE", "cpu")
-num_workers: int = int(os.environ.get("NUM_WORKERS", get_num_of_workers()))
-frame_size: int = int(os.environ.get("FRAME_SIZE", 640))
-stream_path: str = os.environ.get("STREAM_SOURCE", "")
-detection_model_path: str = os.environ.get("DETECTION_MODEL_PATH", "")
-api_endpoint: str = os.environ.get("API_ENDPOINT", "")
-
-detection_model: YOLO = YOLO(detection_model_path, task="obb")
-
-recognition_model: PaddleOCR = PaddleOCR(
-	lang="en",
-	binarize=True,
-	use_angle_cls=True,
-	max_text_length=8,
-	use_space_char=False,
-	device=inference_device,
-	use_mp=True,
-	total_process_num=num_workers,
+from datasets.utils.file_utils import asyncio
+from taiwan_license_plate_recognition import (
+	detect_license_plate,
+	get_frame,
+	initialize_stream,
+	load_detection_model,
+	load_recognition_model,
+	recognize_license_number,
+	send_results,
 )
+from taiwan_license_plate_recognition.Utils import get_num_of_workers
 
-stream: cv2.VideoCapture = cv2.VideoCapture(stream_path)
-stream.set(cv2.CAP_PROP_FOURCC, cv2.VideoWriter.fourcc("M", "J", "P", "G"))
-stream.set(cv2.CAP_PROP_FRAME_WIDTH, frame_size)
-stream.set(cv2.CAP_PROP_FRAME_HEIGHT, frame_size)
-stream.set(cv2.CAP_PROP_FPS, 1)
 
-while stream.isOpened():
-	key: int = cv2.waitKey(90)
-	if key == ord('q') or key == 27:
-		stream.release()
-		break
+async def main() -> None:
+	load_dotenv()
 
-	response, frame = stream.read()
-	if not response:
-		continue
-	cv2.imwrite(f"{project_root}/log/{time.time()}.png", frame)
+	inference_device: str = os.environ.get("INFERENCE_DEVICE", "cpu")
+	num_workers: int = int(os.environ.get("NUM_WORKERS", get_num_of_workers()))
+	frame_size: int = int(os.environ.get("FRAME_SIZE", 640))
+	api_endpoint: str = os.environ.get("API_ENDPOINT", "")
 
-	detections: Generator = detection_model.predict(frame, imgsz=frame_size, half=True, device=inference_device)
-	cropped_images: List[MatLike] = extract_license_plate(detections, frame_size)
-	license_numbers: List[str] = list(filter(None, extract_license_number(cropped_images, recognition_model)))
-	if len(license_numbers) == 0:
-		continue
-	for license_number in license_numbers:
-		print(f"{program_name}: License number: {license_number}")
-		requests.post(api_endpoint, data={"車牌號碼": license_number, "名稱": "車牌辨識"})
+	detection_model: YOLO = await load_detection_model()
+
+	recognition_model: PaddleOCR = await load_recognition_model(
+		lang="en",
+		binarize=True,
+		use_angle_cls=True,
+		max_text_length=8,
+		use_space_char=False,
+		device=inference_device,
+		use_mp=True,
+		total_process_num=num_workers,
+	)
+
+	stream: cv2.VideoCapture = await initialize_stream(frame_size)
+
+	while stream.isOpened():
+		key: int = cv2.waitKey(90)
+		if key == ord('q') or key == 27:
+			stream.release()
+			break
+
+		frame: Optional[MatLike] = await get_frame(stream)
+		if frame is None:
+			continue
+
+		cropped_images: List[MatLike] = await detect_license_plate(detection_model, frame, frame_size, inference_device)
+		license_numbers: List[str] = await recognize_license_number(recognition_model, cropped_images)
+
+		await send_results(license_numbers, api_endpoint)
+
+asyncio.run(main())
