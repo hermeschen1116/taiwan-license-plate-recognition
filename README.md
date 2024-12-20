@@ -31,13 +31,15 @@
 
 - Install dependencies specify in `pyproject.toml`
 
-- Specify environment variables in the `.env`
+- Specify environment variables in the `.env`, change any value based on your needs.
 
   ```
-  IMAGE_SIZE=640
-  YOLO_MODEL_PATH={path to openvino model}
-  CAMERA_ADDRESS={path to media source}
-  API={api endpoint to send the result}
+  INFERENCE_DEVICE="cpu"
+  NUM_WORKERS=8
+  FRAME_SIZE=640
+  STREAM_SOURCE={ address to stream source }
+  DETECTION_MODEL_PATH={ path to model files }
+  API_ENDPOINT={ address of api }
   ```
 
 - execute main.py under `src/`, then it will start the task.
