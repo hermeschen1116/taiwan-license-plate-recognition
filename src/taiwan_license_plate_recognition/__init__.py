@@ -57,6 +57,7 @@ async def get_frame(stream: cv2.VideoCapture, frame_queue: asyncio.Queue) -> Non
 			await asyncio.sleep(0.5)
 			continue
 
+		print("LICENSE NUMBER RECOGNIZER: get frame.")
 		await frame_queue.put(frame)
 
 
