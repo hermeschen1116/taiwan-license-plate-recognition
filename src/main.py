@@ -27,28 +27,28 @@ stream_path: str = os.environ.get("STREAM_SOURCE", "")
 detection_model_path: str = os.environ.get("DETECTION_MODEL_PATH", "")
 api_endpoint: str = os.environ.get("API_ENDPOINT", "")
 
-yolo_model: YOLO = YOLO(detection_model_path, task="obb")
+detection_model: YOLO = YOLO(detection_model_path, task="obb")
 
-reader: PaddleOCR = PaddleOCR(
+recognition_model: PaddleOCR = PaddleOCR(
 	lang="en",
-	device=inference_device,
+	binarize=True,
 	use_angle_cls=True,
 	max_text_length=8,
-	total_process_num=num_workers,
-	use_mp=True,
 	use_space_char=False,
-	binarize=True,
+	device=inference_device,
+	use_mp=True,
+	total_process_num=num_workers,
 )
 
 stream: cv2.VideoCapture = cv2.VideoCapture(stream_path)
-stream.set(cv2.CAP_PROP_FOURCC, cv2.VideoWriter.fourcc('M', 'J', 'P', 'G'))
+stream.set(cv2.CAP_PROP_FOURCC, cv2.VideoWriter.fourcc("M", "J", "P", "G"))
 stream.set(cv2.CAP_PROP_FRAME_WIDTH, frame_size)
 stream.set(cv2.CAP_PROP_FRAME_HEIGHT, frame_size)
 stream.set(cv2.CAP_PROP_FPS, 1)
 
 while stream.isOpened():
 	key: int = cv2.waitKey(90)
-	if key == ord("q") or key == 27:
+	if key == ord('q') or key == 27:
 		stream.release()
 		break
 
@@ -57,9 +57,9 @@ while stream.isOpened():
 		continue
 	cv2.imwrite(f"{project_root}/log/{time.time()}.png", frame)
 
-	detections: Generator = yolo_model.predict(frame, imgsz=frame_size, half=True, device=inference_device)
+	detections: Generator = detection_model.predict(frame, imgsz=frame_size, half=True, device=inference_device)
 	cropped_images: List[MatLike] = extract_license_plate(detections, frame_size)
-	license_numbers: List[str] = list(filter(None, extract_license_number(cropped_images, reader)))
+	license_numbers: List[str] = list(filter(None, extract_license_number(cropped_images, recognition_model)))
 	if len(license_numbers) == 0:
 		continue
 	for license_number in license_numbers:
