@@ -1,8 +1,9 @@
 import os
-from typing import List, Optional
+from asyncio.tasks import Task
+from typing import List
 
+import aiohttp
 import cv2
-from cv2.typing import MatLike
 from dotenv import load_dotenv
 from paddleocr import PaddleOCR
 from ultralytics import YOLO
@@ -43,19 +44,21 @@ async def main() -> None:
 
 	stream: cv2.VideoCapture = await initialize_stream(frame_size)
 
-	while stream.isOpened():
-		key: int = cv2.waitKey(90)
-		if key == ord('q') or key == 27:
-			stream.release()
-			break
+	frame_queue: asyncio.Queue = asyncio.Queue()
+	image_queue: asyncio.Queue = asyncio.Queue()
+	result_queue: asyncio.Queue = asyncio.Queue()
 
-		frame: Optional[MatLike] = await get_frame(stream)
-		if frame is None:
-			continue
+	async with aiohttp.ClientSession() as session:
+		tasks: List[Task] = [
+			asyncio.create_task(get_frame(stream, frame_queue)),
+			asyncio.create_task(
+				detect_license_plate(detection_model, frame_queue, frame_size, inference_device, image_queue)
+			),
+			asyncio.create_task(recognize_license_number(recognition_model, image_queue, result_queue)),
+			asyncio.create_task(send_results(result_queue, session, api_endpoint)),
+		]
 
-		cropped_images: List[MatLike] = await detect_license_plate(detection_model, frame, frame_size, inference_device)
-		license_numbers: List[str] = await recognize_license_number(recognition_model, cropped_images)
+		await asyncio.gather(*tasks, return_exceptions=True)
 
-		await send_results(license_numbers, api_endpoint)
 
 asyncio.run(main())
