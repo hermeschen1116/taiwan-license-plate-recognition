@@ -8,19 +8,13 @@ authors = [
 ]
 requires-python = ">=3.12"
 dependencies = [
-	"accelerate>=1.1.1",
 	"asyncio>=3.4.3",
-	"easyocr>=1.7.2",
-	"jiwer>=3.0.5",
 	"opencv-python>=4.10.0.84",
 	"openvino-dev>=2024.5.0",
 	"optimum[nncf,openvino]>=1.23.3",
 	"paddleocr>=2.9.1",
-	"peft>=0.13.2",
 	"pillow>=11.0.0",
-	"pytesseract>=0.3.13",
 	"torch>=2.2.2",
-	"transformers>=4.44.2",
 	"ultralytics==8.0.238",
 ]
 
@@ -30,19 +24,24 @@ build-backend = "hatchling.build"
 
 [tool.uv]
 dev-dependencies = [
+	"accelerate>=1.2.1",
 	"catppuccin-jupyterlab>=0.2.4",
 	"commitizen>=3.30.0",
 	"datasets>=3.0.2",
+	"easyocr>=1.7.2",
 	"evaluate>=0.4.3",
 	"huggingface-hub>=0.26.2",
+	"jiwer>=3.0.5",
 	"jupyter>=1.1.1",
 	"paddlepaddle>=2.6.2",
 	"pip>=24.3.1",
 	"polars>=1.15.0",
+	"pytesseract>=0.3.13",
 	"python-dotenv>=1.0.1",
 	"roboflow>=1.1.48",
 	"setuptools>=75.6.0",
 	"tqdm>=4.67.1",
+	"transformers>=4.46.3",
 	"wandb>=0.18.5",
 	"wheel>=0.45.1",
 ]
