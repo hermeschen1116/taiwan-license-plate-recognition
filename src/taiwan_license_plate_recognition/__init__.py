@@ -18,23 +18,31 @@ async def load_detection_model() -> YOLO:
 	if not detection_model_path:
 		raise ValueError("LICENSE NUMBER RECOGNIZER: DETECTION_MODEL_PATH not set.")
 
-	return YOLO(detection_model_path, task="obb")
+	detection_model: YOLO = YOLO(detection_model_path, task="obb")
+	print("LICENSE NUMBER RECOGNIZER: detection model loaded.")
+
+	return detection_model
 
 
 async def load_recognition_model(*args, **kwargs) -> PaddleOCR:
 	paddle.disable_signal_handler()
-	return PaddleOCR(*args, **kwargs)
+
+	recognition_model: PaddleOCR =  PaddleOCR(*args, **kwargs)
+	print("LICENSE NUMBER RECOGNIZER: recognition model loaded.")
+
+	return recognition_model
 
 
 async def initialize_stream(frame_size: int) -> cv2.VideoCapture:
-	# stream_source: str = os.environ.get("STREAM_SOURCE", "")
-	stream_source: int = 1
+	stream_source: str = os.environ.get("STREAM_SOURCE", "")
+	# stream_source: int = 1
 	if not stream_source:
 		raise ValueError("LICENSE NUMBER RECOGNIZER: STREAM_SOURCE not set.")
 
 	stream: cv2.VideoCapture = cv2.VideoCapture(stream_source)
-	stream.set(cv2.CAP_PROP_FOURCC, cv2.VideoWriter.fourcc("M", "J", "P", "G"))
+	print("LICENSE NUMBER RECOGNIZER: stream initialized.")
 
+	stream.set(cv2.CAP_PROP_FOURCC, cv2.VideoWriter.fourcc("M", "J", "P", "G"))
 	stream.set(cv2.CAP_PROP_FRAME_WIDTH, frame_size)
 	stream.set(cv2.CAP_PROP_FRAME_HEIGHT, frame_size)
 	stream.set(cv2.CAP_PROP_FPS, 1)
