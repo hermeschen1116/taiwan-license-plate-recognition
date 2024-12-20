@@ -2,7 +2,6 @@ import os
 from asyncio.tasks import Task
 from typing import List
 
-import aiohttp
 import cv2
 from dotenv import load_dotenv
 from paddleocr import PaddleOCR
@@ -48,17 +47,16 @@ async def main() -> None:
 	image_queue: asyncio.Queue = asyncio.Queue()
 	result_queue: asyncio.Queue = asyncio.Queue()
 
-	async with aiohttp.ClientSession() as session:
-		tasks: List[Task] = [
-			asyncio.create_task(get_frame(stream, frame_queue)),
-			asyncio.create_task(
-				detect_license_plate(detection_model, frame_queue, frame_size, inference_device, image_queue)
-			),
-			asyncio.create_task(recognize_license_number(recognition_model, image_queue, result_queue)),
-			asyncio.create_task(send_results(result_queue, session, api_endpoint)),
-		]
+	tasks: List[Task] = [
+		asyncio.create_task(get_frame(stream, frame_queue)),
+		asyncio.create_task(
+			detect_license_plate(detection_model, frame_queue, frame_size, inference_device, image_queue)
+		),
+		asyncio.create_task(recognize_license_number(recognition_model, image_queue, result_queue)),
+		asyncio.create_task(send_results(result_queue, api_endpoint)),
+	]
 
-		await asyncio.gather(*tasks, return_exceptions=True)
+	await asyncio.gather(*tasks, return_exceptions=True)
 
 
 asyncio.run(main())
