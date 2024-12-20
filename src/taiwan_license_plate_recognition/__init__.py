@@ -2,9 +2,9 @@ import asyncio
 import os
 from typing import Generator, List
 
+import aiohttp
 import cv2
 import paddle
-from aiohttp.client import ClientSession
 from cv2.typing import MatLike
 from paddleocr import PaddleOCR
 from ultralytics import YOLO
@@ -27,7 +27,7 @@ async def load_detection_model() -> YOLO:
 async def load_recognition_model(*args, **kwargs) -> PaddleOCR:
 	paddle.disable_signal_handler()
 
-	recognition_model: PaddleOCR =  PaddleOCR(*args, **kwargs)
+	recognition_model: PaddleOCR = PaddleOCR(*args, **kwargs)
 	print("LICENSE NUMBER RECOGNIZER: recognition model loaded.")
 
 	return recognition_model
@@ -86,17 +86,13 @@ async def recognize_license_number(
 		await result_queue.put(list(filter(None, extract_license_number(images, recognition_model))))
 
 
-async def send_result(result: str, session: ClientSession, api_endpoint: str):
-	print(f"LICENSE NUMBER RECOGNIZER: detect {result}.")
-	session.post(api_endpoint, data={"車牌號碼": result, "名稱": "車牌辨識"})
+async def send_results(result_queue: asyncio.Queue, api_endpoint: str) -> None:
+	async with aiohttp.ClientSession() as session:
+		while True:
+			results: List[str] = await result_queue.get()
+			if not results:
+				continue
 
-
-async def send_results(result_queue: asyncio.Queue, session: ClientSession, api_endpoint: str) -> None:
-	while True:
-		results: List[str] = await result_queue.get()
-		if not results:
-			continue
-
-		tasks = [send_result(result, session, api_endpoint) for result in results]
-
-		await asyncio.gather(*tasks)
+			for result in results:
+				print(f"LICENSE NUMBER RECOGNIZER: detect {result}.")
+				session.post(api_endpoint, data={"車牌號碼": result, "名稱": "車牌辨識"})
