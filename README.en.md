@@ -1,34 +1,35 @@
-# 台灣車牌辨識系統
+# Taiwan License Plate Recognition
 
-## 環境
+## Environment
 
 - Python 3.12
 - optimum[nncf,openvino]
 - requests
 
-### 車牌偵測 (YOLO)
+### Detection (YOLO)
 
 - ultralytics==8.0.238
 - roboflow (dataset)
 
-### 車牌辨識 (OCR)
+### Recogntion (OCR)
 
 - paddlepaddle
 - paddleocr
 
-## 架構
+## Architecture
 
 ![architecture](architecture.drawio.png)
 
-- 使用 ultralytics 提供的預測 API 來偵測任何支援的影像來源中的車牌，並根據 bounding box 的座標將其從原影像中切出。
+- First, I use predict API provided by ultralytics and get any supported sources to crop
+  license plate images from them.
 
-- 將裁切出的車牌影像經過 OCR 模型的辨識得到實際的車牌號碼。
+- Then pass the cropped images to the OCR model to extract license number from the images.
 
 ## Usage
 
-- 安裝 dependancies，可以直接使用 uv 來安裝。
+- Install dependencies specify in `pyproject.toml`
 
-- 在根目錄下的 `.env` 檔案加入以下的環境變數，根據實際的運行環境跟模型餐數等調整
+- Specify environment variables in the `.env`, change any value based on your needs.
 
   ```
   INFERENCE_DEVICE="cpu"
@@ -39,15 +40,15 @@
   API_ENDPOINT={ address of api }
   ```
 
-- 執行 `src/` 下的 `main.py` 便會自動運行並回傳結果
+- execute main.py under `src/`, then it will start the task.
 
-## 實作
+## Implementation
 
-### 車牌偵測
+### Detection
 
-- 由於 YOLO 系列模型在物體偵測上已經有非常成熟的應用跟表現，故直接採用 YOLO 來作為車牌辨識模型。
+- YOLO series models provide high accuracy and fast object detection, so I choose YOLO for detection task.
 
-- 由於運行環境會是沒有獨立 GPU 的環境，因此為了在 CPU 也能
+- To achive fast and lightweight inference on CPU, I choose a bit older and smaller model, YOLOv8n.
 
   > **Why not choose newer model?**
   >
@@ -60,7 +61,7 @@
   >
   > OBB format provide rotation of bounding box as extra information, so I can get more precise result.
 
-#### 訓練
+#### Training
 
 - I use API provided by ultralytics to do hyperparameter-tuning, traing, evaluation.
   There's not so much technique to do these tasks because ultralytics automatically handles theses for us.
@@ -68,9 +69,9 @@
 
 - After training, I can easily use export API to save model as OpenVINO IR format for further use.
 
-### 車牌辨識
+### Recognition
 
-- [比較結果](https://api.wandb.ai/links/hermeschen1116/l16nx6qc)
+- [Result](https://api.wandb.ai/links/hermeschen1116/l16nx6qc)
 
 - First, I try TROCR, a transformer based model for OCR task.
   But it hard to fine tune it on my own dataset.
@@ -81,9 +82,9 @@
 - And because in Taiwan, we usually can find some stickers and some marks on license plate may contain not related text on them.
   I also implement a `validate_license_number` function to filter out the text in correct format (common 2-4, 4-2, 3-3, and 3-4 format).
 
-#### 訓練
+#### Training
 
-（由於訓練 PaddleOCR 需要進行額外的資料標記，此部分還在進行中）
+WIP
 
 ## Optimization
 
