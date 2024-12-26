@@ -1,10 +1,9 @@
-import asyncio
 import os
 from typing import Generator, List
 
-import aiohttp
 import cv2
 import paddle
+import requests
 from cv2.typing import MatLike
 from paddleocr import PaddleOCR
 from ultralytics import YOLO
@@ -50,75 +49,26 @@ def initialize_stream(frame_size: int) -> cv2.VideoCapture:
 	return stream
 
 
-async def get_frame(stream: cv2.VideoCapture, frame_queue: asyncio.Queue) -> None:
-	while stream.isOpened():
-		response, frame = stream.read()
-		if not response:
-			print("LICENSE NUMBER RECOGNIZER: fail to get frame.")
-			await asyncio.sleep(0.5)
-			continue
+def process_image(
+	detection_model: YOLO, recognition_model: PaddleOCR, frame: MatLike, frame_size: int, inference_device: str
+) -> List[str]:
+	print("LICENSE NUMBER RECOGNIZER: detecting.")
 
-		await frame_queue.put(frame)
+	detections: Generator = detection_model.predict(frame, imgsz=frame_size, half=True, device=inference_device)
 
+	images: List[MatLike] = extract_license_plate(detections, frame_size)
 
-async def detect_license_plate(
-	detection_model: YOLO,
-	frame_queue: asyncio.Queue,
-	frame_size: int,
-	inference_device: str,
-	image_queue: asyncio.Queue,
-) -> None:
-	while True:
-		print("LICENSE NUMBER RECOGNIZER: detecting.")
-		frame: MatLike = await frame_queue.get()
+	if not images:
+		return []
 
-		detections: Generator = detection_model.predict(frame, imgsz=frame_size, half=True, device=inference_device)
-
-		await image_queue.put(extract_license_plate(detections, frame_size))
+	return list(filter(None, extract_license_number(images, recognition_model)))
 
 
-async def recognize_license_number(
-	recognition_model: PaddleOCR, image_queue: asyncio.Queue, result_queue: asyncio.Queue
-) -> None:
-	while True:
-		print("LICENSE NUMBER RECOGNIZER: recognizing.")
-		images: List[MatLike] = await image_queue.get()
-		if not images:
-			continue
+def send_results(results: List[str], api_endpoint: str) -> None:
+	print("LICENSE NUMBER RECOGNIZER: sending.")
+	if len(results) == 0:
+		return
 
-		await result_queue.put(list(filter(None, extract_license_number(images, recognition_model))))
-
-
-async def process_image(
-	detection_model: YOLO,
-	recognition_model: PaddleOCR,
-	frame_queue: asyncio.Queue,
-	frame_size: int,
-	inference_device: str,
-	result_queue: asyncio.Queue,
-) -> None:
-	while True:
-		print("LICENSE NUMBER RECOGNIZER: detecting.")
-		frame: MatLike = await frame_queue.get()
-
-		detections: Generator = detection_model.predict(frame, imgsz=frame_size, half=True, device=inference_device)
-
-		images: List[MatLike] = extract_license_plate(detections, frame_size)
-
-		if not images:
-			continue
-
-		await result_queue.put(list(filter(None, extract_license_number(images, recognition_model))))
-
-
-async def send_results(result_queue: asyncio.Queue, api_endpoint: str) -> None:
-	async with aiohttp.ClientSession() as session:
-		while True:
-			print("LICENSE NUMBER RECOGNIZER: sending.")
-			results: List[str] = await result_queue.get()
-			if not results:
-				continue
-
-			for result in results:
-				print(f"LICENSE NUMBER RECOGNIZER: detect {result}.")
-				# session.post(api_endpoint, data={"車牌號碼": result, "名稱": "車牌辨識"})
+	for result in results:
+		print(f"LICENSE NUMBER RECOGNIZER: detect {result}.")
+		# requests.post(api_endpoint, data={"車牌號碼": result, "名稱": "車牌辨識"})
