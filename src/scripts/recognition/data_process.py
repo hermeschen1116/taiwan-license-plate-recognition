@@ -22,7 +22,7 @@ with tempfile.TemporaryDirectory() as temp_dir:
 	shutil.copytree(data_source, dataset_path, dirs_exist_ok=True)
 
 	data: List[Dict[str, str]] = [
-		{"label": file.split(".")[0], "image": os.path.join(dataset_path, file)} for file in os.listdir(dataset_path)
+		{"label": file.split(".")[0], "image": os.path.join(dataset_path, file), "path": file} for file in os.listdir(dataset_path)
 	]
 	polars.DataFrame(data).write_csv(f"{temp_dir}/data.csv")
 
