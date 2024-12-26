@@ -7,7 +7,6 @@ import datasets
 import numpy
 import paddle
 from PIL import Image
-from cv2.typing import MatLike
 from datasets import load_dataset
 from dotenv import load_dotenv
 
@@ -46,7 +45,7 @@ with open(f"{data_dir}/train_det_label.txt", 'w') as file:
 	file.writelines(annotations)
 
 for sample in dataset["train"]:
-	image: MatLike = Image.fromarray(sample["image"], "RGB")
+	image = Image.fromarray(sample["image"], "RGB")
 	image.save(f"{data_dir}/det_train_images/{sample['path']}")
 
 with open(f"{data_dir}/test_det_label.txt", 'w') as file:
@@ -54,5 +53,5 @@ with open(f"{data_dir}/test_det_label.txt", 'w') as file:
 	file.writelines(annotations)
 
 for sample in dataset["validation"]:
-	image: MatLike = Image.fromarray(sample["image"], "RGB")
+	image = Image.fromarray(sample["image"], "RGB")
 	image.save(f"{data_dir}/det_test_images/{sample['path']}")
