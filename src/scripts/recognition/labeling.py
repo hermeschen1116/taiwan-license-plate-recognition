@@ -11,7 +11,7 @@ from paddleocr import PaddleOCR
 import datasets
 from datasets import load_dataset
 from taiwan_license_plate_recognition.Utils import get_num_of_workers
-from taiwan_license_plate_recognition.recognition.PostProcess import validate_license_number
+from taiwan_license_plate_recognition.recognition.PostProcess import remove_non_alphanum
 
 paddle.disable_signal_handler()
 load_dotenv()
@@ -20,7 +20,6 @@ project_root: str = os.environ.get("PROJECT_ROOT", "")
 num_workers: int = get_num_of_workers()
 
 dataset = load_dataset("hermeschen1116/taiwan-license-plate-ocr", num_proc=num_workers)
-dataset = dataset.remove_columns(["label_other"])
 
 dataset = dataset.cast_column("image", datasets.Image(decode=True))
 
@@ -42,23 +41,38 @@ reader = PaddleOCR(
 	use_mp=True,
 	use_space_char=False,
 	binarize=True,
-	invert=True,
 )
 
 
-def get_annotation(image: MatLike) -> List[Dict[str, Any]]:
-	results: List[Dict[str, Any]] = [
-		{"transaction": result[1][0], "points": result[0]} for result in reader.ocr(image)[0]
-	]
+def is_labeled(annotations) -> bool:
+	return len(annotations) != 0 and any([annotation["transaction"] != "###" for annotation in annotations])
+
+
+def get_annotation(image: MatLike, label: str) -> List[Dict[str, Any]]:
+	try:
+		detections = reader.ocr(image)[0]
+	except IndexError:
+		return []
+
+	if detections is None:
+		return []
+
+	results: List[Dict[str, Any]] = [{"transaction": result[1][0], "points": result[0]} for result in detections]
 
 	for result in results:
-		if validate_license_number(result["transaction"]) is None:
+		if result["transaction"] != label and result["transaction"] != remove_non_alphanum(label):
 			result["transaction"] = "###"
-		result["points"] = cv2.boundingRect(numpy.array(result["points"]))
+		else:
+			result["transaction"] = label
+
+	if not is_labeled(results):
+		return []
 
 	return results
 
 
-dataset = dataset.map(lambda sample: {"annotation": get_annotation(sample)}, input_columns=["image"])
+dataset = dataset.map(lambda sample: {"annotation": get_annotation(sample["image"], sample["label"])})
+
+dataset = dataset.filter(lambda sample: len(sample) != 0, input_columns=["annotation"])
 
 dataset.push_to_hub("taiwan-license-plate-ocr", commit_message="add label", embed_external_files=True)
