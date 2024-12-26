@@ -3,6 +3,7 @@ from typing import Generator, List
 
 import cv2
 import paddle
+import requests
 from cv2.typing import MatLike
 from dotenv import load_dotenv
 from paddleocr import PaddleOCR
@@ -31,8 +32,8 @@ recognition_model: PaddleOCR = PaddleOCR(
 print("LICENSE NUMBER RECOGNIZER: recognition model loaded.")
 
 
-# stream_source: str = os.environ.get("STREAM_SOURCE", "")
-stream_source: int = 1
+stream_source: str = os.environ.get("STREAM_SOURCE", "")
+# stream_source: int = 1
 if not stream_source:
 	raise ValueError("LICENSE NUMBER RECOGNIZER: STREAM_SOURCE not set.")
 
@@ -67,4 +68,4 @@ while stream.isOpened():
 
 	for result in results:
 		print(f"LICENSE NUMBER RECOGNIZER: detect {result}.")
-		# requests.post(api_endpoint, data={"車牌號碼": result, "名稱": "車牌辨識"})
+		requests.post(api_endpoint, data={"車牌號碼": result, "名稱": "車牌辨識"})
