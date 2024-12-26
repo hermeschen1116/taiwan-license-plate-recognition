@@ -34,8 +34,8 @@ def load_recognition_model(*args, **kwargs) -> PaddleOCR:
 
 
 def initialize_stream(frame_size: int) -> cv2.VideoCapture:
-	stream_source: str = os.environ.get("STREAM_SOURCE", "")
-	# stream_source: int = 1
+	# stream_source: str = os.environ.get("STREAM_SOURCE", "")
+	stream_source: int = 1
 	if not stream_source:
 		raise ValueError("LICENSE NUMBER RECOGNIZER: STREAM_SOURCE not set.")
 
@@ -57,7 +57,7 @@ async def get_frame(stream: cv2.VideoCapture, frame_queue: asyncio.Queue) -> Non
 			print("LICENSE NUMBER RECOGNIZER: fail to get frame.")
 			await asyncio.sleep(0.5)
 			continue
-		print("LICENSE NUMBER RECOGNIZER: get frame.")
+
 		await frame_queue.put(frame)
 
 
@@ -89,6 +89,28 @@ async def recognize_license_number(
 		await result_queue.put(list(filter(None, extract_license_number(images, recognition_model))))
 
 
+async def process_image(
+	detection_model: YOLO,
+	recognition_model: PaddleOCR,
+	frame_queue: asyncio.Queue,
+	frame_size: int,
+	inference_device: str,
+	result_queue: asyncio.Queue,
+) -> None:
+	while True:
+		print("LICENSE NUMBER RECOGNIZER: detecting.")
+		frame: MatLike = await frame_queue.get()
+
+		detections: Generator = detection_model.predict(frame, imgsz=frame_size, half=True, device=inference_device)
+
+		images: List[MatLike] = extract_license_plate(detections, frame_size)
+
+		if not images:
+			continue
+
+		await result_queue.put(list(filter(None, extract_license_number(images, recognition_model))))
+
+
 async def send_results(result_queue: asyncio.Queue, api_endpoint: str) -> None:
 	async with aiohttp.ClientSession() as session:
 		while True:
@@ -99,4 +121,4 @@ async def send_results(result_queue: asyncio.Queue, api_endpoint: str) -> None:
 
 			for result in results:
 				print(f"LICENSE NUMBER RECOGNIZER: detect {result}.")
-				session.post(api_endpoint, data={"車牌號碼": result, "名稱": "車牌辨識"})
+				# session.post(api_endpoint, data={"車牌號碼": result, "名稱": "車牌辨識"})
