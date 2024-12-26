@@ -3,6 +3,7 @@ from typing import Any, Dict, List
 
 import cv2
 import numpy
+import paddle
 from cv2.typing import MatLike
 from dotenv import load_dotenv
 from paddleocr import PaddleOCR
@@ -12,6 +13,7 @@ from datasets import load_dataset
 from taiwan_license_plate_recognition.Utils import get_num_of_workers
 from taiwan_license_plate_recognition.recognition.PostProcess import validate_license_number
 
+paddle.disable_signal_handler()
 load_dotenv()
 
 project_root: str = os.environ.get("PROJECT_ROOT", "")
@@ -52,7 +54,7 @@ def get_annotation(image: MatLike) -> List[Dict[str, Any]]:
 	for result in results:
 		if validate_license_number(result["transaction"]) is None:
 			result["transaction"] = "###"
-		result["points"] = cv2.boundingRect(result["points"])
+		result["points"] = cv2.boundingRect(numpy.array(result["points"]))
 
 	return results
 
