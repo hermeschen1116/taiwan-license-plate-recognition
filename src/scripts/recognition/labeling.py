@@ -45,7 +45,7 @@ reader = PaddleOCR(
 
 
 def is_labeled(annotations) -> bool:
-	return len(annotations) != 0 and any([annotation["transaction"] != "###" for annotation in annotations])
+	return len(annotations) != 0 and any([annotation["transcription"] != "###" for annotation in annotations])
 
 
 def get_annotation(image: MatLike, label: str) -> List[Dict[str, Any]]:
@@ -57,13 +57,13 @@ def get_annotation(image: MatLike, label: str) -> List[Dict[str, Any]]:
 	if detections is None:
 		return []
 
-	results: List[Dict[str, Any]] = [{"transaction": result[1][0], "points": result[0]} for result in detections]
+	results: List[Dict[str, Any]] = [{"transcription": result[1][0], "points": result[0]} for result in detections]
 
 	for result in results:
-		if result["transaction"] != label and result["transaction"] != remove_non_alphanum(label):
-			result["transaction"] = "###"
+		if result["transcription"] != label and result["transcription"] != remove_non_alphanum(label):
+			result["transcription"] = "###"
 		else:
-			result["transaction"] = label
+			result["transcription"] = label
 
 	if not is_labeled(results):
 		return []

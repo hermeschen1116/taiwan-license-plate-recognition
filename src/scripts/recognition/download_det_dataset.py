@@ -43,7 +43,7 @@ else:
 
 with open(f"{data_dir}/train_det_label.txt", "a") as file:
 	annotations: List[str] = [
-		f"det_train_images/{sample['path']}\t{sample['annotation']}\n" for sample in dataset["train"]
+		f"det_train_images/{sample['path']}\t{sample['annotation']}\n".replace("'", '"') for sample in dataset["train"]
 	]
 	file.writelines(annotations)
 
@@ -53,7 +53,8 @@ for sample in dataset["train"]:
 
 with open(f"{data_dir}/test_det_label.txt", "a") as file:
 	annotations: List[str] = [
-		f"det_test_images/{sample['path']}\t{sample['annotation']}\n" for sample in dataset["validation"]
+		f"det_test_images/{sample['path']}\t{sample['annotation']}\n".replace("'", '"')
+		for sample in dataset["validation"]
 	]
 	file.writelines(annotations)
 
