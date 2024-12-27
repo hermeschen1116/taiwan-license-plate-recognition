@@ -3,13 +3,13 @@ import shutil
 from typing import List
 
 import cv2
-import datasets
 import numpy
 import paddle
 from PIL import Image
-from datasets import load_dataset
 from dotenv import load_dotenv
 
+import datasets
+from datasets import load_dataset
 from taiwan_license_plate_recognition.Utils import get_num_of_workers
 
 paddle.disable_signal_handler()
@@ -21,6 +21,7 @@ num_workers: int = get_num_of_workers()
 dataset = load_dataset("hermeschen1116/taiwan-license-plate-ocr", num_proc=num_workers)
 
 dataset = dataset.cast_column("image", datasets.Image(decode=True))
+
 
 def encode_image(image) -> numpy.ndarray:
 	cv2_image = cv2.cvtColor(numpy.asarray(image, dtype=numpy.uint8), cv2.COLOR_RGB2BGR)
@@ -40,16 +41,20 @@ else:
 	os.makedirs(f"{data_dir}/det_train_images")
 	os.makedirs(f"{data_dir}/det_test_images")
 
-with open(f"{data_dir}/train_det_label.txt", 'w') as file:
-	annotations: List[str] = [f"det_train_images/{sample['path']}\t{sample['annotation']}" for sample in dataset["train"]]
+with open(f"{data_dir}/train_det_label.txt", "w") as file:
+	annotations: List[str] = [
+		f"det_train_images/{sample['path']}\t{sample['annotation']}" for sample in dataset["train"]
+	]
 	file.writelines(annotations)
 
 for sample in dataset["train"]:
 	image = Image.fromarray(sample["image"], "RGB")
 	image.save(f"{data_dir}/det_train_images/{sample['path']}")
 
-with open(f"{data_dir}/test_det_label.txt", 'w') as file:
-	annotations: List[str] = [f"det_test_images/{sample['path']}\t{sample['annotation']}" for sample in dataset["validation"]]
+with open(f"{data_dir}/test_det_label.txt", "w") as file:
+	annotations: List[str] = [
+		f"det_test_images/{sample['path']}\t{sample['annotation']}" for sample in dataset["validation"]
+	]
 	file.writelines(annotations)
 
 for sample in dataset["validation"]:
