@@ -41,9 +41,9 @@ else:
 	os.makedirs(f"{data_dir}/det_train_images")
 	os.makedirs(f"{data_dir}/det_test_images")
 
-with open(f"{data_dir}/train_det_label.txt", "w") as file:
+with open(f"{data_dir}/train_det_label.txt", "a") as file:
 	annotations: List[str] = [
-		f"det_train_images/{sample['path']}\t{sample['annotation']}" for sample in dataset["train"]
+		f"det_train_images/{sample['path']}\t{sample['annotation']}\n" for sample in dataset["train"]
 	]
 	file.writelines(annotations)
 
@@ -51,9 +51,9 @@ for sample in dataset["train"]:
 	image = Image.fromarray(sample["image"], "RGB")
 	image.save(f"{data_dir}/det_train_images/{sample['path']}")
 
-with open(f"{data_dir}/test_det_label.txt", "w") as file:
+with open(f"{data_dir}/test_det_label.txt", "a") as file:
 	annotations: List[str] = [
-		f"det_test_images/{sample['path']}\t{sample['annotation']}" for sample in dataset["validation"]
+		f"det_test_images/{sample['path']}\t{sample['annotation']}\n" for sample in dataset["validation"]
 	]
 	file.writelines(annotations)
 
