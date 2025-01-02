@@ -1,9 +1,9 @@
 import os
+import time
 from typing import Generator, List
 
 import cv2
 import paddle
-import requests
 from cv2.typing import MatLike
 from dotenv import load_dotenv
 from paddleocr import PaddleOCR
@@ -27,13 +27,20 @@ detection_model: YOLO = YOLO(detection_model_path, task="obb")
 print("LICENSE NUMBER RECOGNIZER: detection model loaded.")
 
 recognition_model: PaddleOCR = PaddleOCR(
-	lang="en", binarize=True, use_angle_cls=True, max_text_length=8, use_space_char=False, device=inference_device
+	lang="en",
+	binarize=True,
+	use_angle_cls=True,
+	max_text_length=8,
+	use_space_char=False,
+	device=inference_device,
+	use_mp=True,
+	total_process_num=8,
 )
 print("LICENSE NUMBER RECOGNIZER: recognition model loaded.")
 
 
-stream_source: str = os.environ.get("STREAM_SOURCE", "")
-# stream_source: int = 1
+# stream_source: str = os.environ.get("STREAM_SOURCE", "")
+stream_source: int = 1
 if not stream_source:
 	raise ValueError("LICENSE NUMBER RECOGNIZER: STREAM_SOURCE not set.")
 
@@ -49,6 +56,7 @@ while stream.isOpened():
 	response, frame = stream.read()
 	if not response:
 		print("LICENSE NUMBER RECOGNIZER: fail to get frame.")
+		time.sleep(30)
 		continue
 
 	print("LICENSE NUMBER RECOGNIZER: detecting.")
@@ -58,14 +66,18 @@ while stream.isOpened():
 	images: List[MatLike] = extract_license_plate(detections, frame_size)
 
 	if not images:
+		time.sleep(30)
 		continue
 
 	results: List[str] = list(filter(None, extract_license_number(images, recognition_model)))
 
 	print("LICENSE NUMBER RECOGNIZER: sending.")
 	if len(results) == 0:
+		time.sleep(30)
 		continue
 
 	for result in results:
 		print(f"LICENSE NUMBER RECOGNIZER: detect {result}.")
-		requests.post(api_endpoint, data={"車牌號碼": result, "名稱": "車牌辨識"})
+		# requests.post(api_endpoint, data={"車牌號碼": result, "名稱": "車牌辨識"})
+
+	time.sleep(30)
