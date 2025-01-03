@@ -336,7 +336,6 @@ pyrightconfig.json
 
 # model file
 *.pt
-!**/**/models/*.pt
+**/**/models/
 **/**/checkpoints/
-**/**/.ov_cache/
 **/**/artifacts/
