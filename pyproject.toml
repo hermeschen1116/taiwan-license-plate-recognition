@@ -44,6 +44,7 @@ dev-dependencies = [
 	"tqdm>=4.67.1",
 	"transformers>=4.46.3",
 	"wandb>=0.18.5",
+	"wget>=3.2",
 	"wheel>=0.45.1",
 ]
 

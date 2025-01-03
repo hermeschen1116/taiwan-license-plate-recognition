@@ -1,5 +1,6 @@
 import os
 
+import wget
 from dotenv import load_dotenv
 from roboflow import Roboflow
 from ultralytics import YOLO
@@ -23,7 +24,17 @@ dataset = (
 	.download("yolov8-obb", location=f"{project_root}/datasets/roboflow")
 )
 
-model = YOLO(f"{project_root}/models/yolov8n-obb.pt", task="obb")
+model_dir: str = f"{project_root}/models"
+model_path: str = f"{model_dir}/yolov8n-obb.pt"
+
+if not os.path.exists(model_dir):
+	os.makedirs(model_dir)
+
+if os.path.isfile(model_path):
+	os.remove(model_path)
+wget.download(url="https://github.com/ultralytics/assets/releases/download/v8.2.0/yolov8n-obb.pt", out=model_path)
+
+model = YOLO(model_path, task="obb")
 
 add_wandb_callback(model, enable_model_checkpointing=True, visualize_skeleton=True)
 
