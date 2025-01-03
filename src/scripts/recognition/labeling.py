@@ -2,14 +2,14 @@ import os
 from typing import Any, Dict, List
 
 import cv2
+import datasets
 import numpy
 import paddle
 from cv2.typing import MatLike
+from datasets import load_dataset
 from dotenv import load_dotenv
 from paddleocr import PaddleOCR
 
-import datasets
-from datasets import load_dataset
 from taiwan_license_plate_recognition.Utils import get_num_of_workers
 from taiwan_license_plate_recognition.recognition.PostProcess import remove_non_alphanum
 

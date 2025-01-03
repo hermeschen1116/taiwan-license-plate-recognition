@@ -1,15 +1,15 @@
 import os
 from typing import List
 
+import datasets
 import evaluate
 from PIL.Image import Image
+from datasets import load_dataset
 from dotenv import load_dotenv
 from optimum.intel import OVModelForVision2Seq, OVWeightQuantizationConfig
 from transformers import TrOCRProcessor
 
-import datasets
 import wandb
-from datasets import load_dataset
 from taiwan_license_plate_recognition.Utils import get_num_of_workers
 from taiwan_license_plate_recognition.recognition.Metrics import accuracy
 from taiwan_license_plate_recognition.recognition.PostProcess import validate_license_number

@@ -1,6 +1,0 @@
-[submodule "src/PaddleOCR"]
-	path = src/PaddleOCR
-	url = git@github.com:hermeschen1116/PaddleOCR.git
-[submodule "src/scripts/recognition/PaddleOCR"]
-	path = src/scripts/recognition/PaddleOCR
-	url = git@github.com:hermeschen1116/PaddleOCR.git
