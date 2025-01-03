@@ -24,10 +24,10 @@ with tarfile.open(f"{model_dir}/en_PP-OCRv3_det_slim_distill_train.tar", "r") as
 
 print("Downloading Recognition Model......")
 wget.download(
-	url="https://paddleocr.bj.bcebos.com/PP-OCRv3/english/en_PP-OCRv3_rec_slim_train.tar",
-	out=f"{model_dir}/en_PP-OCRv3_rec_slim_train.tar",
+	url="https://paddleocr.bj.bcebos.com/PP-OCRv4/english/en_PP-OCRv4_rec_train.tar",
+	out=f"{model_dir}/en_PP-OCRv4_rec_train.tar",
 )
 
-with tarfile.open(f"{model_dir}/en_PP-OCRv3_rec_slim_train.tar", "r") as tar:
+with tarfile.open(f"{model_dir}/en_PP-OCRv4_rec_train.tar", "r") as tar:
 	print("Extracting Model Files.......")
 	tar.extractall(f"{model_dir}/")
