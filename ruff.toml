@@ -1,7 +1,7 @@
 fix = true
 line-length = 120
 preview = true
-exclude = ["**/**/EasyOCR/**/**"]
+exclude = ["**/**/PaddleOCR/**/**"]
 
 [analyze]
 detect-string-imports = true

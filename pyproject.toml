@@ -49,4 +49,4 @@ dev-dependencies = [
 ]
 
 [project.optional-dependencies]
-cuda = ["bitsandbytes>=0.44.1"]
+cuda = ["bitsandbytes>=0.44.1", "paddlepaddle-gpu"]
