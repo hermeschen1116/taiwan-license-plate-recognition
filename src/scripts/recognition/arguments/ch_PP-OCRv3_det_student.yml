@@ -5,7 +5,7 @@ Global:
     epoch_num: 500
     log_smooth_window: 20
     print_batch_step: 10
-    save_model_dir: ./en_PP-OCRv3_det_slim_distill/
+    save_model_dir: ./output/en_PP-OCRv3_det_slim_distill/
     save_epoch_step: 100
     eval_batch_step:
         - 0
@@ -70,7 +70,7 @@ Metric:
     main_indicator: hmean
 Train:
     dataset:
-        name: LicenseNumberDetectionDataset
+        name: SimpleDataSet
         data_dir: ./datasets/det/det_train_images/
         label_file_list:
             - ./datasets/det/train_det_label.txt
@@ -134,7 +134,7 @@ Train:
         num_workers: 20
 Eval:
     dataset:
-        name: LicenseNumberDetectionDataset
+        name: SimpleDataSet
         data_dir: ./datasets/det/det_test_images/
         label_file_list:
             - ./datasets/det/test_det_label.txt

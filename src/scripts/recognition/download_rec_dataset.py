@@ -3,14 +3,14 @@ import shutil
 from typing import List
 
 import cv2
+import datasets
 import numpy
 import paddle
 from PIL import Image
+from datasets import load_dataset
 from dotenv import load_dotenv
 from tqdm.auto import tqdm
 
-import datasets
-from datasets import load_dataset
 from taiwan_license_plate_recognition.Utils import get_num_of_workers
 
 paddle.disable_signal_handler()
