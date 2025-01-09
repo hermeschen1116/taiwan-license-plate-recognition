@@ -71,7 +71,7 @@ Metric:
 Train:
     dataset:
         name: SimpleDataSet
-        data_dir: ./datasets/det/det_train_images/
+        data_dir: ./datasets/det/
         label_file_list:
             - ./datasets/det/train_det_label.txt
         ratio_list: [1.0]
@@ -135,7 +135,7 @@ Train:
 Eval:
     dataset:
         name: SimpleDataSet
-        data_dir: ./datasets/det/det_test_images/
+        data_dir: ./datasets/det/
         label_file_list:
             - ./datasets/det/test_det_label.txt
         transforms:
