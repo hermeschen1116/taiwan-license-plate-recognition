@@ -339,3 +339,4 @@ pyrightconfig.json
 **/**/models/
 **/**/checkpoints/
 **/**/artifacts/
+**/**/output/
