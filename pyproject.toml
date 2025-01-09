@@ -33,7 +33,6 @@ dev-dependencies = [
 	"jiwer>=3.0.5",
 	"marimo[recommended]>=0.10.9",
 	"opencv-contrib-python-headless>=4.10.0.84",
-	"paddlepaddle>=2.6.2",
 	"pip>=24.3.1",
 	"polars>=1.15.0",
 	"ppocrlabel>=2.1.12",
@@ -49,4 +48,10 @@ dev-dependencies = [
 ]
 
 [project.optional-dependencies]
-cuda = ["bitsandbytes>=0.44.1", "paddlepaddle-gpu"]
+cuda = [
+    "bitsandbytes>=0.44.1",
+    "paddlepaddle-gpu>=2.6.2",
+]
+cpu = [
+    "paddlepaddle>=2.6.2",
+]

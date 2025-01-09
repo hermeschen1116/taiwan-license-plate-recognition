@@ -4,10 +4,10 @@ import tempfile
 from typing import Dict, List
 
 import polars
-from datasets import DatasetDict
-from datasets.features.image import Image
 from dotenv import load_dotenv
 
+from datasets import DatasetDict
+from datasets.features.image import Image
 from taiwan_license_plate_recognition.Utils import get_num_of_workers
 
 load_dotenv()
