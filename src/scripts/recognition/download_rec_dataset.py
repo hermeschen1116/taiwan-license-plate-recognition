@@ -9,6 +9,7 @@ import paddle
 from PIL import Image
 from datasets import load_dataset
 from dotenv import load_dotenv
+from tqdm.auto import tqdm
 
 from taiwan_license_plate_recognition.Utils import get_num_of_workers
 
@@ -43,20 +44,22 @@ else:
 
 with open(f"{data_dir}/train_rec_label.txt", "a") as file:
 	annotations: List[str] = [
-		f"rec_train_images/{sample['path']}\t{sample['label']}\n".replace("'", '"') for sample in dataset["train"]
+		f"rec_train_images/{sample['path']}\t{sample['label']}\n".replace("'", '"')
+		for sample in tqdm(dataset["train"], desc="Recognition Dataset (train): ", colour="green")
 	]
 	file.writelines(annotations)
 
-for sample in dataset["train"]:
+for sample in tqdm(dataset["train"], desc="Recognition Dataset (train): ", colour="blue"):
 	image = Image.fromarray(sample["image"], "RGB")
 	image.save(f"{data_dir}/rec_train_images/{sample['path']}")
 
 with open(f"{data_dir}/test_rec_label.txt", "a") as file:
 	annotations: List[str] = [
-		f"rec_test_images/{sample['path']}\t{sample['label']}\n".replace("'", '"') for sample in dataset["validation"]
+		f"rec_test_images/{sample['path']}\t{sample['label']}\n".replace("'", '"')
+		for sample in tqdm(dataset["validation"], desc="Recognition Dataset (test): ", colour="green")
 	]
 	file.writelines(annotations)
 
-for sample in dataset["validation"]:
+for sample in tqdm(dataset["validation"], desc="Recognition Dataset (test): ", colour="blue"):
 	image = Image.fromarray(sample["image"], "RGB")
 	image.save(f"{data_dir}/rec_test_images/{sample['path']}")
