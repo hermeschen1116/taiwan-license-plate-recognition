@@ -1,28 +1,28 @@
 Global:
     debug: false
+    use_wandb: True
     use_gpu: true
     epoch_num: 500
     log_smooth_window: 20
     print_batch_step: 10
-    save_model_dir: ./output/det/
+    save_model_dir: ./output/ch_PP-OCR_V3_det/
     save_epoch_step: 100
     eval_batch_step:
         - 0
         - 400
     cal_metric_during_train: false
-    pretrained_model: ./ch_PP-OCRv3_det_distill_train/student.pdparams
+    pretrained_model: ./models/en_PP-OCRv3_det_slim_distill_train/student.pdparams
     checkpoints: null
     save_inference_dir: null
     use_visualdl: false
-    infer_img: doc/imgs_en/img_10.jpg
+    infer_img: null
     save_res_path: ./checkpoints/det_db/predicts_db.txt
     distributed: true
-    use_wandb: true
 
 wandb:
     project: taiwan-license-plate-recognition
     group: PaddleOCR
-    job_type: train
+    job_type: fine_tune
 
 Architecture:
     model_type: det
@@ -54,7 +54,7 @@ Optimizer:
     beta2: 0.999
     lr:
         name: Cosine
-        learning_rate: 0.0001
+        learning_rate: 0.001
         warmup_epoch: 2
     regularizer:
         name: L2
@@ -70,10 +70,10 @@ Metric:
     main_indicator: hmean
 Train:
     dataset:
-        name: hermeschen1116/taiwan-license-plate-ocr
-        data_dir: ./train_data/det/
+        name: LicenseNumberDetectionDataset
+        data_dir: ./datasets/det/det_train_images/
         label_file_list:
-            - ./train_data/det/train_det_label.txt
+            - ./datasets/det/train_det_label.txt
         ratio_list: [1.0]
         transforms:
             - DecodeImage:
@@ -134,10 +134,10 @@ Train:
         num_workers: 20
 Eval:
     dataset:
-        name: hermeschen1116/taiwan-license-plate-ocr
-        data_dir: ./train_data/det/
+        name: LicenseNumberDetectionDataset
+        data_dir: ./datasets/det/det_test_images/
         label_file_list:
-            - ./train_data/det/test_det_label.txt
+            - ./datasets/det/test_det_label.txt
         transforms:
             - DecodeImage:
                   img_mode: BGR
