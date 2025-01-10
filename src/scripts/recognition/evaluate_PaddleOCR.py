@@ -46,6 +46,7 @@ reader = PaddleOCR(
 	use_mp=True,
 	use_space_char=False,
 	binarize=True,
+	det_model_dir=f"{project_root}/output/license_number-detection",
 )
 
 cer_metric = evaluate.load("cer", keep_in_memory=True)
@@ -56,6 +57,7 @@ dataset = dataset.map(
 		"prediction": [result if result is not None else "" for result in extract_license_number(samples, reader)]
 	},
 	input_columns=["image"],
+	remove_columns=["image", "path", "annotation"],
 	batched=True,
 	batch_size=4,
 )
@@ -65,7 +67,7 @@ accuracy_score = accuracy(predictions=dataset["prediction"], references=dataset[
 
 run.log({"test/cer": cer_score, "test/accuracy": accuracy_score})
 
-result = wandb.Table(dataframe=dataset.remove_columns(["image"]).to_pandas())
+result = wandb.Table(dataframe=dataset.to_pandas())
 run.log({"evaluation_result": result})
 
 run.finish()

@@ -13,7 +13,7 @@ Global:
     cal_metric_during_train: false
     pretrained_model: ./models/en_PP-OCRv3_det_slim_distill_train/student.pdparams
     checkpoints: null
-    save_inference_dir: null
+    save_inference_dir: ./output/license_number-detection-inference/
     use_visualdl: false
     infer_img: null
     save_res_path: ./checkpoints/det_db/predicts_db.txt
