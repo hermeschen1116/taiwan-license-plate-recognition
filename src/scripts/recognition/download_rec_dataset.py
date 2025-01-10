@@ -1,17 +1,19 @@
 import os
 import shutil
-from typing import List
+from typing import Any, Dict, List, Optional
 
 import cv2
 import numpy
 import paddle
 from PIL import Image
+from cv2.typing import MatLike
 from dotenv import load_dotenv
 from tqdm.auto import tqdm
 
 import datasets
 from datasets import load_dataset
 from taiwan_license_plate_recognition.Utils import get_num_of_workers
+from taiwan_license_plate_recognition.detection.PostProcess import crop_image
 
 paddle.disable_signal_handler()
 load_dotenv()
@@ -49,8 +51,17 @@ with open(f"{data_dir}/train_rec_label.txt", "a") as file:
 	]
 	file.writelines(annotations)
 
+
+def get_text_image(image: MatLike, label: str, annotations: List[Dict[str, Any]]) -> Optional[MatLike]:
+	for annotation in annotations:
+		if annotation["transcription"] == label:
+			return crop_image(image, numpy.array(annotation["points"], dtype=numpy.float32))
+	return None
+
+
 for sample in tqdm(dataset["train"], desc="Recognition Dataset (train): ", colour="blue"):
-	image = Image.fromarray(sample["image"], "RGB")
+	image = get_text_image(sample["image"], sample["label"], sample["annotation"])
+	image = Image.fromarray(image, "RGB")
 	image.save(f"{data_dir}/rec_train_images/{sample['path']}")
 
 with open(f"{data_dir}/test_rec_label.txt", "a") as file:
@@ -61,5 +72,6 @@ with open(f"{data_dir}/test_rec_label.txt", "a") as file:
 	file.writelines(annotations)
 
 for sample in tqdm(dataset["validation"], desc="Recognition Dataset (test): ", colour="blue"):
-	image = Image.fromarray(sample["image"], "RGB")
+	image = get_text_image(sample["image"], sample["label"], sample["annotation"])
+	image = Image.fromarray(image, "RGB")
 	image.save(f"{data_dir}/rec_test_images/{sample['path']}")
